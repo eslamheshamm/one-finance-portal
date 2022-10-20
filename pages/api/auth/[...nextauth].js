@@ -50,7 +50,7 @@ export default NextAuth({
 		}),
 	],
 	session: {
-		maxAge: 
+		maxAge: 30 * 24 * 60 * 60, // 30 days
 	},
 	callbacks: {
 		jwt: async ({ token, user }) => {
@@ -64,4 +64,3 @@ export default NextAuth({
 	},
 	secret: "d7RtFvQoqZz1tWmqU5uwebjA3HQXCsXI5MgQ+J9GMMU=",
 });
-
