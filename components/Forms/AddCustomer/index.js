@@ -148,11 +148,11 @@ const AddCustomerForm = () => {
 				},
 			})
 			.then(({ data }) => {
+				console.log(data, "datratatatata");
 				toast.dismiss(loading);
 				if (data.isSuccess) {
 					toast.success("تم العثور على العميل.");
 					const customer = data.data;
-					console.log(customer, "id");
 					setCustomerId(customer.customerID);
 					setValue("FirstName", customer.firstName);
 					setValue("SecondName", customer.secondName);
@@ -160,7 +160,6 @@ const AddCustomerForm = () => {
 					setValue("LastName", customer.lastName);
 					setValue("Address", customer.homeAddress);
 					setValue("InvestigationAddress", customer.inquireAddress);
-
 					setValue("Email", customer.email);
 					setValue("PhoneNumber", customer.primaryPhone);
 					setValue("SecPhoneNumber", customer.anotherPhone);
@@ -169,25 +168,8 @@ const AddCustomerForm = () => {
 					setValue("businessAddress", customer.businessAddress);
 					setValue("businessName", customer.businessName);
 					setValue("Income", customer.monthlyIncome);
-					// customer interseted product
 					setValue("LoanAmount", customer.amount);
 					setValue("DownPayment", customer.downPayment);
-					{
-						customer.productTypeID &&
-							setSelectedCategoryProduct({
-								...selectedCategoryProduct,
-								categoryName:
-									customer.customerInterestedProduct.productTypeName,
-								id: customer.customerInterestedProduct.productTypeId,
-							});
-					}
-					{
-						customer.customerInterestedProduct.productTypeId &&
-							setSelectedProduct({
-								name: customer.customerInterestedProduct.productName,
-								id: customer.customerInterestedProduct.productId,
-							});
-					}
 				}
 			})
 			.catch(() => {
@@ -212,8 +194,8 @@ const AddCustomerForm = () => {
 			GetCustomerDocs();
 		}
 	}, [customerId]);
-	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0  focus:ring-0 `;
 
+	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0  focus:ring-0 `;
 	return (
 		<section className="w-10/12 mx-auto ">
 			<Toaster position="bottom-center" />
@@ -275,51 +257,7 @@ const AddCustomerForm = () => {
 							"يرجي إدخال رقم قومي صحيح"}
 					</p>
 				</div>
-				{/* product */}
-				<div className="  px-12 py-8 rounded-[32px] bg-white shadow-sm">
-					<h2 className=" font-bold text-[#EDAA00] mb-5 text-xl">
-						بيانات المنتج المطلوب
-					</h2>
-					{/* product category */}
-					<div className="grid grid-cols-2  gap-6">
-						<ProductsDropDown
-							selectedCategoryProduct={selectedCategoryProduct}
-							setSelectedCategoryProduct={setSelectedCategoryProduct}
-							setSelectedProduct={setSelectedProduct}
-							selectedProduct={selectedProduct}
-							className="col-span-2"
-						/>
-						<div className="space-y-3">
-							<label className="font-semibold">قيمة التمويل المتوقعة</label>
-							<input
-								type="number"
-								placeholder=" 0 جنيه مصري"
-								{...register("LoanAmount")}
-								className={buttonClass}
-							/>
-						</div>
-						<div className=" space-y-3 ">
-							<label className="font-semibold">الدفعة المقدمة المتوقعة</label>
-							<input
-								type="number"
-								placeholder=" 0 جنيه مصري"
-								{...register("DownPayment")}
-								className={buttonClass}
-							/>
-						</div>
-						<div className=" space-y-3  col-span-2">
-							<label className="font-bold">الدفعة المقدمة المتوقعة</label>
-							<div
-								className={classNames(
-									buttonClass,
-									"text-center bg-gray-400 font-bold text-white bg-opacity-100"
-								)}
-							>
-								{downPaymentRate}%
-							</div>
-						</div>
-					</div>
-				</div>
+
 				{/* customer info */}
 				<div className="px-12 py-8 space-y-5 bg-white rounded-3xl shadow-sm">
 					{/* Name Inputs */}

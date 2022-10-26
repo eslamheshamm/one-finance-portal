@@ -50,7 +50,8 @@ export default NextAuth({
 		}),
 	],
 	session: {
-		maxAge: 30 * 24 * 60 * 60, // 30 days
+		maxAge: 60 * 60 * 7, // 7 houres
+		keepAlive: 60 * 60 * 7,
 	},
 	callbacks: {
 		jwt: async ({ token, user }) => {

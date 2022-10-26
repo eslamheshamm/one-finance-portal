@@ -25,9 +25,9 @@ export const JobDropDown = ({ className }) => {
 			)}
 			{isSuccess && (
 				<>
-					<div className=" space-y-5">
+					<div className=" space-y-5 z-50">
 						<label className="font-semibold">الوظيفة</label>
-						<Listbox value={jobsList} onChange={setJobsList} name={"carsList"}>
+						<Listbox value={jobsList} onChange={setJobsList}>
 							<div className="relative ">
 								<Listbox.Button
 									className=" text-black  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
