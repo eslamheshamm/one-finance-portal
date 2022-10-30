@@ -43,11 +43,10 @@ const CustomersQueue = () => {
 			.get("/api/Customer/GetPendingCustomers")
 			.then((res) => {
 				toast.dismiss(loading);
-				console.log(res, "ress");
 				if (res.data.isSuccess) {
 					toast.success("تم تحميل البيانات بنجاح");
 					setLoading(true);
-					setCustomerData(res.data.pendingCustomers);
+					setCustomerData(res.data.data);
 				}
 			})
 			.catch((error) => {

@@ -39,11 +39,13 @@ const RiskCustomerPreview = () => {
 	const GetCusomerInfo = () => {
 		const loadingCustomerInfo = toast.loading("جاري تحميل بيانات العميل");
 		apiClient
-			.post("/api/Customer/GetCustomerDetails", { customerId: id })
+			.get("/api/Customer/GetCustomerDetailsByID", {
+				params: { CustomerID: id },
+			})
 			.then((res) => {
 				toast.dismiss(loadingCustomerInfo);
 				if (res.data.isSuccess) {
-					setCustomerInfo(res.data.customer);
+					setCustomerInfo(res.data.data);
 					toast.success("تم تحميل بيانات العميل بنجاح");
 				}
 			})
@@ -54,8 +56,9 @@ const RiskCustomerPreview = () => {
 	};
 	const GetCustomerDocs = () => {
 		apiClient
-			.post("/api/Customer/GetRequestedCustomerDocuments", {
-				customerId: id,
+			.get("/api/Document/GetDocument", {
+				id: id,
+				type: 1,
 			})
 			.then((res) => {
 				if (res.data.isSuccess) {
@@ -66,10 +69,10 @@ const RiskCustomerPreview = () => {
 				toast.error("لقد حدث خطأ في الأنترنت.");
 			});
 	};
-	const GetLoanRequestHistory = () => {
+	const GetCusomerRequestHistory = () => {
 		apiClient
 			.post("/api/Customer/GetCustomerRequestHistory", {
-				customerId: customerId,
+				CustomerId: customerId,
 			})
 			.then((res) => {
 				if (res.data.isSuccess) {
@@ -80,16 +83,12 @@ const RiskCustomerPreview = () => {
 				toast.error("لقد حدث خطأ في الأنترنت.");
 			});
 	};
-	// useEffect(() => {
-	// 	if (session && session.user) {
-	// 		handleSetCustomerAsTaken();
-	// 	}
-	// }, [session]);
+
 	useEffect(() => {
 		if (customerId) {
 			GetCusomerInfo();
 			GetCustomerDocs();
-			GetLoanRequestHistory();
+			GetCusomerRequestHistory();
 		}
 	}, [customerId]);
 

@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useState } from "react";
-import ActiveLink from "../../../components/Atomics/ActiveLink";
 import { useSession } from "next-auth/react";
 import classNames from "classnames";
 import Link from "next/link";
@@ -8,38 +7,23 @@ import apiClient from "../../../services/apiClient";
 import { Transition, Listbox } from "@headlessui/react";
 import "moment/locale/ar";
 import moment from "moment";
+import { useQuery } from "@tanstack/react-query";
 
 const filters = [
 	{ id: 1, name: "الكل", value: "All" },
 	{ id: 2, name: "انتظار", value: "Submitted Customer" },
 	{ id: 3, name: "محدثة", value: "Updated Customer" },
 ];
-const RiskNewCustomers = () => {
-	const { data: session, status } = useSession();
-	const [customersData, setCustomerData] = useState([]);
-	const [loading, setLoading] = useState(true);
-
-	const [q, setQ] = useState("");
-	const [searchParam] = useState(["idno"]);
-	const [filterParam, setFilterParam] = useState(filters[0]);
-
-	const GetRiskcustomersData = () => {
-		apiClient
-			.post("api/Customer/GetSubmittedCustomers", { user: session.user.id })
-			.then((res) => {
-				setCustomerData(res.data.requestedCustomers);
-				setLoading(false);
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-	};
-
-	useEffect(() => {
-		if (session && session.user) {
-			GetRiskcustomersData();
+const RiskPendingCustomers = () => {
+	const { isLoading, isError, isSuccess, data } = useQuery(
+		["pendingCustomersQueue"],
+		async () => {
+			return await apiClient.get("/api/Customer/GetSubmittedCustomers");
 		}
-	}, [session]);
+	);
+	const [q, setQ] = useState("");
+	const [searchParam] = useState(["nationalID"]);
+	const [filterParam, setFilterParam] = useState(filters[0]);
 
 	function search(items) {
 		return items.filter((item) => {
@@ -61,7 +45,7 @@ const RiskNewCustomers = () => {
 
 	return (
 		<DashboardLayout>
-			{loading && (
+			{isLoading && (
 				<div className=" flex justify-center items-center ">
 					<svg
 						role="status"
@@ -81,7 +65,7 @@ const RiskNewCustomers = () => {
 					</svg>
 				</div>
 			)}
-			{!loading && (
+			{isSuccess && (
 				<>
 					<section className=" w-11/12 mx-auto  py-8 px-12 bg-white rounded-[32px] shadow-sm">
 						<form className="grid grid-cols-5 gap-6 items-center">
@@ -167,11 +151,9 @@ const RiskNewCustomers = () => {
 										</tr>
 									</thead>
 									<tbody>
-										{customersData &&
-											search(customersData).map((item) => {
-												if (item) {
-													return <LoanRequestPreview key={item.id} {...item} />;
-												}
+										{data?.data?.data &&
+											search(data?.data?.data).map((item) => {
+												return <LoanRequestPreview key={item.id} {...item} />;
 											})}
 									</tbody>
 								</table>
@@ -179,7 +161,7 @@ const RiskNewCustomers = () => {
 							<div className="flex items-center justify-center w-full">
 								<p className="mt-6 text-2xl">
 									عدد الطلبات:{" "}
-									<span className="font-bold">{customersData.length}</span>
+									<span className="font-bold">{data?.data?.data.length}</span>
 								</p>
 							</div>
 						</div>
@@ -189,19 +171,19 @@ const RiskNewCustomers = () => {
 		</DashboardLayout>
 	);
 };
-export default RiskNewCustomers;
+export default RiskPendingCustomers;
 
 const LoanRequestPreview = ({
 	customerName,
-	sales,
+	salesName,
 	office,
-	idno,
+	nationalID,
 	id,
 	status,
 	...props
 }) => {
 	moment.locale("ar");
-	const formatedDate = moment(props.updatedOnDate).format(
+	const formatedDate = moment(props.submittedDate).format(
 		"DD MMM  - h:mm:ss a"
 	);
 	return (
@@ -214,13 +196,13 @@ const LoanRequestPreview = ({
 			</td>
 			<td className="px-6 py-4">
 				<div className="flex items-center font-bold">
-					<p>{idno}</p>
+					<p>{nationalID}</p>
 				</div>
 			</td>
 
 			<td className="px-6 py-4">
 				<div className="flex items-center">
-					<p>{sales}</p>
+					<p>{salesName}</p>
 				</div>
 			</td>
 			<td className="px-6 py-4">

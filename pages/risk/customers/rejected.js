@@ -4,25 +4,19 @@ import classNames from "classnames";
 import Link from "next/link";
 import DashboardLayout from "../../../components/Dashboard/Layout";
 import apiClient from "../../../services/apiClient";
+import { useQuery } from "@tanstack/react-query";
 
 const RejectedCustomers = () => {
-	const { data: session, status } = useSession();
 	const [q, setQ] = useState("");
 	const [searchParam] = useState(["customerName"]);
-	const [customersData, setCustomersData] = useState([]);
-	const [loading, setLoading] = useState(true);
-	const GetApprovedCustomersRisk = () => {
-		apiClient
-			.post("/api/Customer/GetRejectedCustomers")
-			.then(({ data }) => {
-				setCustomersData(data.rejectedCustomers);
-				setLoading(false);
-			})
-			.catch((err) => console.log(err));
-	};
-	useEffect(() => {
-		GetApprovedCustomersRisk();
-	}, []);
+
+	const { isLoading, isError, isSuccess, data } = useQuery(
+		["rejectedCustomersQueue"],
+		async () => {
+			return await apiClient.get("/api/Customer/GetRejectedCustomers");
+		}
+	);
+
 	function search(items) {
 		return items.filter((item) => {
 			return searchParam.some((newItem) => {
@@ -32,9 +26,10 @@ const RejectedCustomers = () => {
 			});
 		});
 	}
+
 	return (
 		<DashboardLayout>
-			{loading && (
+			{isLoading && (
 				<div className=" flex justify-center items-center ">
 					<svg
 						role="status"
@@ -55,7 +50,7 @@ const RejectedCustomers = () => {
 				</div>
 			)}
 
-			{!loading && (
+			{isSuccess && (
 				<>
 					<section className=" w-10/12 mx-auto  p-8 rounded-[32px] bg-white shadmw-sm">
 						<form className="grid gap-6 items-center">
@@ -94,8 +89,8 @@ const RejectedCustomers = () => {
 										</tr>
 									</thead>
 									<tbody>
-										{customersData &&
-											search(customersData).map((item) => {
+										{data?.data?.data &&
+											search(data?.data?.data).map((item) => {
 												if (item) {
 													return <LoanRequestPreview key={item.id} {...item} />;
 												}
@@ -114,9 +109,9 @@ export default RejectedCustomers;
 
 const LoanRequestPreview = ({
 	customerName,
-	sales,
-	idno,
-	office,
+	salesName,
+	nationalID,
+	branchName,
 	status,
 	id,
 }) => {
@@ -130,17 +125,17 @@ const LoanRequestPreview = ({
 			</td>
 			<td className="px-6 py-4">
 				<div className="flex items-center">
-					<p>{sales}</p>
+					<p>{salesName}</p>
 				</div>
 			</td>
 			<td className="px-6 py-4">
 				<div className="flex items-center">
-					<p>{idno}</p>
+					<p>{nationalID}</p>
 				</div>
 			</td>
 			<td className="px-6 py-4">
 				<div className="flex items-center">
-					<p>{office}</p>
+					<p>{branchName}</p>
 				</div>
 			</td>
 			<td className="px-6 py-4">

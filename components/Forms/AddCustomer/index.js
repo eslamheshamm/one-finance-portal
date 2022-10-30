@@ -11,6 +11,9 @@ import { AddressDropDown } from "../../Atomics/Sales/AddressDropDown";
 import { CarsDropDown } from "../../Atomics/Sales/CarsDropDown";
 import { ClubsDropDown } from "../../Atomics/Sales/ClubsDropDown";
 import { JobDropDown } from "../../Atomics/Sales/JobDropDown";
+import { JobSectorDropDown } from "../../Atomics/Sales/JobSectorDropDown";
+import { OwnHomeDropDown } from "../../Atomics/Sales/OwnHomDropDown";
+import { OwnSecondHomeDropDown } from "../../Atomics/Sales/OwnSecondHomeDropDown";
 import { ProductsDropDown } from "../../Atomics/Sales/ProductDropDown";
 
 const handleCalculateDownPaymentRate = (dp, la) => {
@@ -453,7 +456,7 @@ const AddCustomerForm = () => {
 					</div>
 				</div>
 				<div className="mt-6">
-					<div className=" mt-6 px-12 py-8 bg-white rounded-[32px] shadow-sm">
+					<div className=" mt-6 px-12 py-8 bg-white rounded-[32px] flex flex-col gap-5 shadow-sm">
 						<h2 className=" font-bold text-[#EDAA00] mb-4 text-xl">
 							معلومات إضافية
 						</h2>
@@ -472,8 +475,13 @@ const AddCustomerForm = () => {
 							</div>
 						</div>
 						<div className="grid grid-cols-3 gap-5">
+							<JobSectorDropDown />
 							<JobDropDown />
 							<ClubsDropDown />
+						</div>
+						<div className="grid grid-cols-2 gap-5">
+							<OwnHomeDropDown />
+							<OwnSecondHomeDropDown />
 						</div>
 					</div>
 				</div>

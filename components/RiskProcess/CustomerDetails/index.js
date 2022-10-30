@@ -105,30 +105,20 @@ export const CustomerDetails = ({
 		);
 		apiClient
 			.post("/api/Customer/ApproveCustomer", {
-				id: customerInfo.customer.id,
+				customerID: customerInfo.customerID,
 				comment: data.notes,
-				user: session.user.id,
-				changeStatus: watchReasons === "save" ? 0 : 1,
-				scoring: {
-					customerId: customerInfo.customer.id,
-					segmentation: segmentation.value,
-					pricing: pricing.value,
-					dpr: data.dpr,
-					dprAmount: data.dprAmount,
-					exposureLimit: data.exposureLimit,
-					cgfLimit: data.cgfLimit,
-					cgfRate: data.cgfRate,
-				},
+				isSaving: watchReasons === "save" ? true : false,
 				calculation: {
-					iScoreScore: data.iScore,
+					iScoreScore: data.iScoreScore,
 					iScoreFileUrl: `"${iscoreUrl}"`,
 					homeVisitFileUrl: `"${homeVisitUrl}"`,
 					workVisitFileUrl: `"${workVisitUrl}"`,
 					comment: data.notes,
 					assumedIncome: data.assumedIncome,
-					customerId: customerInfo.customer.id,
-					insertedonDate: new Date(),
-					insertedby: session.user.id,
+					creditCard: data.creditCard,
+					personalLoan: data.personalLoan,
+					autoLoan: data.autoLoan,
+					overDraft: data.overDraft,
 				},
 			})
 			.then((res) => {
@@ -155,9 +145,8 @@ export const CustomerDetails = ({
 		const loader = toast.loading("جاري إرسال طلب التعديل.");
 		apiClient
 			.post("/api/Customer/SetCustomerAsPending", {
-				id: customerInfo.customer.id,
+				id: customerInfo.customerID,
 				comment: data.notes,
-				user: session.user.id,
 			})
 			.then((res) => {
 				if (res.data.isSuccess) {
@@ -179,9 +168,8 @@ export const CustomerDetails = ({
 		const loading = toast.loading("جاري رفض العميل..");
 		apiClient
 			.post("/api/Customer/RejectCustomer", {
-				id: customerInfo.customer.id,
+				customerID: customerInfo.customerID,
 				comment: data.notes,
-				user: session.user.id,
 				rejectionReason: refuseReason.id,
 			})
 			.then((res) => {
@@ -216,6 +204,7 @@ export const CustomerDetails = ({
 			RequestForEdit(data);
 		}
 	};
+	console.log(customerInfo);
 	useEffect(() => {
 		if (customerInfo && customerInfo.customerCalculation) {
 			setValue("iScore", customerInfo.customerCalculation.iScoreScore);
@@ -248,10 +237,8 @@ export const CustomerDetails = ({
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:ring-0 focus:border-0 focus:outline-[#EDAA00] block w-full border-0`;
 	moment.locale("en");
 	const formatedBirthDate =
-		(customerInfo.customerAdditionalData &&
-			moment(customerInfo.customerAdditionalData.dateOfBirth).format(
-				"YYYY-MM-DD"
-			)) ||
+		(customerInfo.dateOfBirth &&
+			moment(customerInfo.dateOfBirth).format("YYYY-MM-DD")) ||
 		"";
 	return (
 		<section className="w-full px-12">
@@ -300,152 +287,137 @@ export const CustomerDetails = ({
 							<div className="ml-4  rounded-full  flex justify-center items-center">
 								{Person}
 							</div>
-							<p className="font-bold">{`${
-								customerInfo.customer.firstName || ""
-							} ${customerInfo.customer.secondName || ""} ${
-								customerInfo.customer.thirdName
-							} ${customerInfo.customer.fourthName || ""}`}</p>
+							<p className="font-bold">{`${customerInfo.firstName || ""} ${
+								customerInfo.secondName || ""
+							} ${customerInfo.middileName} ${customerInfo.lastName || ""}`}</p>
 						</div>
-						{customerInfo.customer.officeName && (
+						{customerInfo.branchName && (
 							<div>
 								<p className=" rounded-full  font-bold my-6">
-									الفرع: {customerInfo.customer.officeName}
+									الفرع: {customerInfo.branchName}
 								</p>
 							</div>
 						)}
 					</div>
 					<div className="grid grid-cols-2 gap-x-8 gap-y-6 w-10/12">
-						{customerInfo.customer.idno && (
+						{customerInfo.nationalID && (
 							<div>
 								<h5 className="my-3 font-medium">الرقم القومي</h5>
 								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-									{customerInfo.customer.idno}
+									{customerInfo.nationalID}
 								</p>
 							</div>
 						)}
-						{customerInfo.customerAdditionalData && (
-							<>
-								{customerInfo.customerAdditionalData.genderStr && (
-									<div>
-										<h5 className="my-3 font-medium">الجنس</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.genderStr === "Male"
-												? "ذكر"
-												: "أنثي"}
-										</p>
-									</div>
-								)}
-								{customerInfo.customerAdditionalData.dateOfBirth && (
-									<div>
-										<h5 className="my-3 font-medium">تاريخ الميلاد</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{formatedBirthDate}
-										</p>
-									</div>
-								)}
-								{customerInfo.customerAdditionalData.mobileNumber && (
-									<div>
-										<h5 className="my-3 font-medium">رقم الهاتف</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.mobileNumber}
-										</p>
-									</div>
-								)}
-								{customerInfo.customerAdditionalData.mobileNumber2 && (
-									<div>
-										<h5 className="my-3 font-medium">الثاني رقم الهاتف</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.mobileNumber2}
-										</p>
-									</div>
-								)}
+						{customerInfo.gender && (
+							<div>
+								<h5 className="my-3 font-medium">الجنس</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.gender === "Male" ? "ذكر" : "أنثي"}
+								</p>
+							</div>
+						)}
+						{customerInfo.dateOfBirth && (
+							<div>
+								<h5 className="my-3 font-medium">تاريخ الميلاد</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{formatedBirthDate}
+								</p>
+							</div>
+						)}
+						{customerInfo.primaryPhone && (
+							<div>
+								<h5 className="my-3 font-medium">رقم الهاتف</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.primaryPhone}
+								</p>
+							</div>
+						)}
+						{customerInfo.anotherPhone && (
+							<div>
+								<h5 className="my-3 font-medium">الثاني رقم الهاتف</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.anotherPhone}
+								</p>
+							</div>
+						)}
 
-								{customerInfo.customerAdditionalData.mobileNumber2 && (
-									<div>
-										<h5 className="my-3 font-medium">رقم الهاتف الأخر</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.mobileNumber2}
-										</p>
-									</div>
-								)}
-								{customerInfo.customerAdditionalData.homeAddress && (
-									<div>
-										<h5 className="my-3 font-medium">العنوان</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.homeAddress}
-										</p>
-									</div>
-								)}
-								{customerInfo.customerAdditionalData.inquireAddress && (
-									<div>
-										<h5 className="my-3 font-medium">عنوان الإستعلام</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.inquireAddress}
-										</p>
-									</div>
-								)}
-								{customerInfo.customerAdditionalData.emailAddress && (
-									<div>
-										<h5 className="my-3 font-medium">الايميل</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.emailAddress}
-										</p>
-									</div>
-								)}
-								{customerInfo.customerAdditionalData.buesinessDescription && (
-									<div>
-										<h5 className="my-3 font-medium">المسمي الوظيفي</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.buesinessDescription}
-										</p>
-									</div>
-								)}
-								<div>
-									<h5 className="my-3 font-medium">عدد سنوات العمل</h5>
-									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-										{customerInfo.customerAdditionalData.yearsInBusiness}
-									</p>
-								</div>
+						{customerInfo.homeAddress && (
+							<div>
+								<h5 className="my-3 font-medium">العنوان</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.homeAddress}
+								</p>
+							</div>
+						)}
+						{customerInfo.inquireAddress && (
+							<div>
+								<h5 className="my-3 font-medium">عنوان الإستعلام</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.inquireAddress}
+								</p>
+							</div>
+						)}
+						{customerInfo.email && (
+							<div>
+								<h5 className="my-3 font-medium">الايميل</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.email}
+								</p>
+							</div>
+						)}
+						{customerInfo.buesinessDescription && (
+							<div>
+								<h5 className="my-3 font-medium">المسمي الوظيفي</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.buesinessDescription}
+								</p>
+							</div>
+						)}
+						{customerInfo.yearsInBusiness && (
+							<div>
+								<h5 className="my-3 font-medium">عدد سنوات العمل</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.yearsInBusiness}
+								</p>
+							</div>
+						)}
 
-								{customerInfo.customerAdditionalData.businessName && (
-									<div>
-										<h5 className="my-3 font-medium">إسم جهة العمل</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.businessName}
-										</p>
-									</div>
-								)}
-								{customerInfo.customerAdditionalData.buesinessAddress && (
-									<div>
-										<h5 className="my-3 font-medium">عنوان جهة العمل</h5>
-										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-											{customerInfo.customerAdditionalData.buesinessAddress}
-										</p>
-									</div>
-								)}
-								<div>
-									<h5 className="my-3 font-medium">الدخل الشهري</h5>
-									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-										{customerInfo.customerAdditionalData.monthlyIncome}
-									</p>
-								</div>
-							</>
+						{customerInfo.businessName && (
+							<div>
+								<h5 className="my-3 font-medium">إسم جهة العمل</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.businessName}
+								</p>
+							</div>
+						)}
+						{customerInfo.businessAddress && (
+							<div>
+								<h5 className="my-3 font-medium">عنوان جهة العمل</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.businessAddress}
+								</p>
+							</div>
+						)}
+						{customerInfo.monthlyIncome && (
+							<div>
+								<h5 className="my-3 font-medium">الدخل الشهري</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.monthlyIncome}
+								</p>
+							</div>
 						)}
 					</div>
 				</div>
 			)}
 
-			{customerInfo.customerInterestedProduct && (
-				<div className="flex flex-col items-start ">
+			{/* <div className="flex flex-col items-start ">
 					<div className="w-full">
 						<h2 className="mb-6 text-2xl font-bold">معلومات المنتج المتوقع</h2>
 						<div className="grid grid-cols-2 gap-x-8 gap-y-6 w-10/12 mb-12">
 							<div className=" w-full">
 								<h5 className="my-3 ">المنتج</h5>
 								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-									{customerInfo.customerInterestedProduct.productName
-										? customerInfo.customerInterestedProduct.productName
-										: "لم يتم تحديد المنتج"}
+									{customerInfo.customerInterestedProduct.productName}
 								</p>
 							</div>
 							<div className=" w-full">
@@ -478,7 +450,7 @@ export const CustomerDetails = ({
 						</div>
 					</div>
 				</div>
-			)}
+				 */}
 			{customerInfo.customerCalculation && (
 				<div className="flex flex-col items-start ">
 					<div className="w-full">
@@ -572,7 +544,7 @@ export const CustomerDetails = ({
 				</div>
 			)}
 			{/* customerScoring */}
-			{customerInfo && customerInfo.customerScoring && (
+			{/* {customerInfo && customerInfo.customerScoring && (
 				<div className="mb-12">
 					<h2 className="mb-6 text-2xl font-bold">شريحة العميل </h2>
 					<div className="grid grid-cols-2 gap-x-8 gap-y-6 w-10/12">
@@ -621,7 +593,7 @@ export const CustomerDetails = ({
 						</div>
 					</div>
 				</div>
-			)}
+			)} */}
 
 			{disableAction ? null : (
 				<div className="">
@@ -629,15 +601,15 @@ export const CustomerDetails = ({
 						{/* customer rate */}
 						<div className=" border-t border-b py-8">
 							<h2 className="mb-6 text-2xl font-bold ">بيانات التقييم </h2>
-							<div className="grid grid-cols-2 gap-x-6">
+							<div className="grid grid-cols-2 gap-6">
 								<div className=" w-full space-y-5">
-									<label htmlFor="iScore" className="font-semibold">
+									<label htmlFor="iScoreScore" className="font-semibold">
 										تقييم الIscore
 									</label>
 									<input
 										type="number"
 										placeholder="0"
-										{...register("iScore")}
+										{...register("iScoreScore")}
 										className={buttonClass}
 									/>
 								</div>
@@ -649,6 +621,50 @@ export const CustomerDetails = ({
 										type="number"
 										placeholder="0"
 										{...register("assumedIncome")}
+										className={buttonClass}
+									/>
+								</div>
+								<div className=" w-full space-y-5">
+									<label htmlFor="creditCard" className="font-semibold">
+										Credit Card
+									</label>
+									<input
+										type="number"
+										placeholder="0"
+										{...register("creditCard")}
+										className={buttonClass}
+									/>
+								</div>
+								<div className=" w-full space-y-5">
+									<label htmlFor="personalLoan" className="font-semibold">
+										Personal Loan
+									</label>
+									<input
+										type="number"
+										placeholder="0"
+										{...register("personalLoan")}
+										className={buttonClass}
+									/>
+								</div>
+								<div className=" w-full space-y-5">
+									<label htmlFor="autoLoan" className="font-semibold">
+										Auto Loan
+									</label>
+									<input
+										type="number"
+										placeholder="0"
+										{...register("autoLoan")}
+										className={buttonClass}
+									/>
+								</div>
+								<div className=" w-full space-y-5">
+									<label htmlFor="overDraft" className="font-semibold">
+										Over Draft
+									</label>
+									<input
+										type="number"
+										placeholder="0"
+										{...register("overDraft")}
 										className={buttonClass}
 									/>
 								</div>
@@ -678,7 +694,7 @@ export const CustomerDetails = ({
 									) : (
 										<FileUploader
 											fileName={"Iscore"}
-											EntityID={customerInfo.customer.id}
+											EntityID={customerInfo.customerID}
 											EntityType={1}
 											TypeID={312}
 											setUrl={setIscoreUrl}
@@ -707,7 +723,7 @@ export const CustomerDetails = ({
 									) : (
 										<FileUploader
 											fileName={"إستعلام منزلي"}
-											EntityID={customerInfo.customer.id}
+											EntityID={customerInfo.customerID}
 											EntityType={1}
 											TypeID={313}
 											setUrl={setHomeVisitUrl}
@@ -735,7 +751,7 @@ export const CustomerDetails = ({
 									) : (
 										<FileUploader
 											fileName={"إستعلام عمل"}
-											EntityID={customerInfo.customer.id}
+											EntityID={customerInfo.customerID}
 											EntityType={1}
 											TypeID={314}
 											setUrl={setWorkVisitUrl}
@@ -745,109 +761,6 @@ export const CustomerDetails = ({
 							</div>
 						</div>
 
-						{/* exposure limit */}
-						<h2 className="mb-6 text-2xl font-bold ">تقييم العميل </h2>
-						<div className="grid  gap-y-6">
-							<div className="grid grid-cols-2 gap-x-6">
-								<div className=" w-full space-y-4 z-40">
-									<label htmlFor="segmentation" className="font-semibold ">
-										شريحة العميل
-									</label>
-									<CustomDropDown
-										option={segmentation}
-										selectOption={setSegmentation}
-										items={segmentationList}
-										icon={Arrow}
-										className=" text-black  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
-									/>
-								</div>
-								<div className=" w-full space-y-4">
-									<label htmlFor="pricing" className="font-semibold">
-										شريحة التسعير
-									</label>
-									<CustomDropDown
-										option={pricing}
-										selectOption={setPricing}
-										items={pricingList}
-										icon={Arrow}
-										className=" text-black  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
-									/>
-								</div>
-							</div>
-							{/* limit */}
-							<div className="grid grid-cols-3 gap-6">
-								<div className=" w-full space-y-5">
-									<label htmlFor="exposureLimit" className="font-semibold">
-										حد تمويل العميل
-									</label>
-									<input
-										type="number"
-										placeholder="0"
-										{...register("exposureLimit", {
-											required: watchReasons === "accept" ? true : false,
-										})}
-										className={buttonClass}
-									/>
-								</div>
-								<div className=" w-full space-y-5">
-									<label htmlFor="cgfLimit" className="font-semibold">
-										حد السلعة المعمرة
-									</label>
-									<input
-										type="number"
-										placeholder="0"
-										{...register("cgfLimit", {
-											required: watchReasons === "accept" ? true : false,
-										})}
-										className={buttonClass}
-									/>
-								</div>
-								<div className=" w-full space-y-5">
-									<label htmlFor="cgfRate" className="font-semibold">
-										نسبة فائدة السلعة المعمرة
-									</label>
-									<input
-										type="number"
-										placeholder="0"
-										{...register("cgfRate", {
-											required: watchReasons === "accept" ? true : false,
-										})}
-										className={buttonClass}
-										step="00.01"
-									/>
-								</div>
-							</div>
-							{/* dpr */}
-							<div className="grid grid-cols-2 gap-6">
-								<div className=" w-full space-y-5">
-									<label htmlFor="dpr" className="font-semibold">
-										DBR Ratio
-									</label>
-									<input
-										type="string"
-										placeholder="0"
-										{...register("dpr", {
-											required: watchReasons === "accept" ? true : false,
-										})}
-										step="00.01"
-										className={buttonClass}
-									/>
-								</div>
-								<div className=" w-full space-y-5">
-									<label htmlFor="dprAmount" className="font-semibold">
-										DBR Amount
-									</label>
-									<input
-										type="string"
-										placeholder="0"
-										{...register("dprAmount", {
-											required: watchReasons === "accept" ? true : false,
-										})}
-										className={buttonClass}
-									/>
-								</div>
-							</div>
-						</div>
 						{/* actions */}
 						<div className="w-full space-y-5">
 							<h5 className="font-bold text-2xl ">ملاحظة</h5>
