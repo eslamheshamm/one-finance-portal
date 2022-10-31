@@ -113,7 +113,6 @@ const LoanRequestPreview = ({
 	nationalID,
 	branchName,
 	status,
-	id,
 }) => {
 	return (
 		<tr className="bg-white text-center text-[#6E7191]">

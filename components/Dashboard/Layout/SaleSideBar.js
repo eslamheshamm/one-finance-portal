@@ -1,4 +1,3 @@
-// import { Accordion } from "flowbite-react";
 import { SideBarAccordion } from "../../Atomics/Accordion";
 import ActiveLink from "../../Atomics/ActiveLink";
 

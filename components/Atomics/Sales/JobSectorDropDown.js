@@ -15,6 +15,7 @@ export const JobSectorDropDown = () => {
 		name: "إختيار نوع الوظيفة",
 		clubID: -1,
 	});
+	console.log(data, "jovsecc");
 	return (
 		<>
 			{isLoading && (
@@ -38,14 +39,12 @@ export const JobSectorDropDown = () => {
 								>
 									<button>{jobSector.name}</button>
 								</Listbox.Button>
-								<Listbox.Options className="absolute h-64 mt-2 w-full overflow-scroll rounded-2xl bg-white  text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+								<Listbox.Options className="absolute h-64 mt-2 w-full overflow-scroll rounded-2xl bg-white  text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
 									{data?.data?.data?.map((club, idx) => (
 										<Listbox.Option
 											className={({ active }) =>
 												`relative cursor-default select-none py-4 pl-10 pr-4 ${
-													active
-														? "bg-amber-100 text-amber-900"
-														: "text-gray-900"
+													active && "bg-amber-100 text-amber-900"
 												}`
 											}
 											key={idx++}

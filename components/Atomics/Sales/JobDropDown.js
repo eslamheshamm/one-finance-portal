@@ -36,7 +36,7 @@ export const JobDropDown = ({ className }) => {
 									<button>{jobsList.name}</button>
 								</Listbox.Button>
 								<Listbox.Options className="absolute h-64 mt-2 w-full overflow-scroll rounded-2xl bg-white  text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-									{data.data.data.map((job) => (
+									{data?.data?.data?.map((job) => (
 										<Listbox.Option
 											className={({ active }) =>
 												`relative cursor-default select-none py-4 pl-10 pr-4 ${

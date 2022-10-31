@@ -16,7 +16,7 @@ const filters = [
 ];
 const RiskPendingCustomers = () => {
 	const { isLoading, isError, isSuccess, data } = useQuery(
-		["pendingCustomersQueue"],
+		["submitedCustomersQueue"],
 		async () => {
 			return await apiClient.get("/api/Customer/GetSubmittedCustomers");
 		}

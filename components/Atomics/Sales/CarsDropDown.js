@@ -62,7 +62,7 @@ export const CarsDropDown = ({ className }) => {
 			)}
 			{isSuccess && (
 				<>
-					<div className=" space-y-5 z-50">
+					<div className=" space-y-5 relative w-full bg-white">
 						<h3 className="font-semibold">نوع السيارة</h3>
 						<Listbox value={carsList} onChange={setCarsList}>
 							<Listbox.Button
@@ -71,12 +71,12 @@ export const CarsDropDown = ({ className }) => {
 							>
 								<button>{carsList.name}</button>
 							</Listbox.Button>
-							<Listbox.Options className="absolute z-[999999] h-40 mt-2 rounded-2xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+							<Listbox.Options className="w-full absolute z-[999999] overflow-auto rounded-2xl bg-white shadow-md focus:outline-none">
 								{data.data.data.vehicleList.map((car) => (
 									<Listbox.Option
 										className={({ active }) =>
 											`relative cursor-default select-none py-4  bg-white pl-10 pr-4 z-[999999] ${
-												active ? "bg-amber-100 text-amber-900" : "text-gray-900"
+												active && "bg-amber-100"
 											}`
 										}
 										key={car.vehicleID}
@@ -88,10 +88,8 @@ export const CarsDropDown = ({ className }) => {
 							</Listbox.Options>
 						</Listbox>
 					</div>
-					<div className=" space-y-5">
-						<label htmlFor="product" className="font-semibold">
-							موديل السيارة
-						</label>
+					<div className=" space-y-5 relative bg-white z-[9999]">
+						<label className="font-semibold">موديل السيارة</label>
 						<Listbox
 							value={carsModel}
 							onChange={(e) => {
@@ -106,16 +104,14 @@ export const CarsDropDown = ({ className }) => {
 								>
 									<button>{carsModel.name}</button>
 								</Listbox.Button>
-								<Listbox.Options className="absolute mt-2 w-full overflow-scroll rounded-2xl bg-white  text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+								<Listbox.Options className="absolute mt-2 w-full overflow-auto rounded-2xl bg-white shadow-md">
 									{carsList.vehicleModelList &&
 										carsList.vehicleModelList.map((city) => {
 											return (
 												<Listbox.Option
 													className={({ active }) =>
-														`relative cursor-default select-none py-4 pl-10 pr-4 ${
-															active
-																? "bg-amber-100 text-amber-900"
-																: "text-gray-900"
+														`relative py-4 pl-10 pr-4 ${
+															active && "bg-amber-100"
 														}`
 													}
 													key={city.cityID}

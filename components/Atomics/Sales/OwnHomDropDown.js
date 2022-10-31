@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const OwnHomeDropDown = () => {
 	const { isLoading, isError, isSuccess, data } = useQuery(
-		["jobSector"],
+		["firstHome"],
 		async () => {
 			return await apiClient.get("/api/Lookup/GetLookupOwnershipHome");
 		}

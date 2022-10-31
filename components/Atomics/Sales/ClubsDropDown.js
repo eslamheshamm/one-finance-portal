@@ -39,7 +39,7 @@ export const ClubsDropDown = ({ className }) => {
 									<button>{clubsList.name}</button>
 								</Listbox.Button>
 								<Listbox.Options className="absolute h-64 mt-2 w-full overflow-scroll rounded-2xl bg-white  text-base shadow-lg p-0		">
-									{data.data.data.map((club) => (
+									{data?.data?.data?.map((club) => (
 										<Listbox.Option
 											className={({ active }) =>
 												`relative cursor-default select-none py-4 pl-10 pr-4 z-20 bg-white ${

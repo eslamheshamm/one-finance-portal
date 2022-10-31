@@ -1,7 +1,6 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import classNames from "classnames";
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { Tab } from "@headlessui/react";

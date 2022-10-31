@@ -6,49 +6,64 @@ import DashboardLayout from "../../../../components/Dashboard/Layout";
 import apiClient from "../../../../services/apiClient";
 import toast, { Toaster } from "react-hot-toast";
 import { Loading } from "../../../../components/Atomics/Loading";
+import { useQuery } from "@tanstack/react-query";
 
 const AcceptedCustomer = () => {
-	const router = useRouter();
-	const { id } = router.query;
-	const customerId = id;
+	const { query, isReady } = useRouter();
+	const { id } = query;
 	const [customerInfo, setCustomerInfo] = useState(null);
 	const [comment, setComment] = useState("");
+	const { isLoading, isError, isSuccess, data } = useQuery(
+		["getAcceptedCustomerDetails"],
 
-	useEffect(() => {
-		if (customerId) {
-			const fetchCustomerData = () => {
-				const loading = toast.loading("جاري تحميل بيانات العميل ..");
-				apiClient
-					.post("/api/Customer/GetCustomerDetails", { customerId })
-					.then((res) => {
-						toast.dismiss(loading);
-						if (res.data.isSuccess) {
-							toast.success("تم تحميل بيانات العميل.");
-							setCustomerInfo(res.data.customer);
-							setComment(res.data.customer.customerStatusDetails.comment);
-						}
-						if (!res.data.isSuccess) {
-							toast.error("لقد حدث خطأ.");
-						}
-					})
-					.catch(() => {
-						toast.dismiss(loading);
-						toast.error("لقد حدث خطأ.");
-					});
-			};
-			fetchCustomerData();
+		async () => {
+			const res = await apiClient.get("/api/Customer/GetCustomerDetailsByID", {
+				params: { CustomerID: id },
+			});
+			return res;
 		}
-	}, [customerId]);
-	console.log(customerInfo);
+	);
+	console.log(data);
+	// useEffect(() => {
+	// 	if (isSuccess) {
+	// 		setCustomerInfo(data.data.data);
+	// 	}
+	// }, [data, isSuccess]);
+	// console.log(customerInfo, "infooo");
+	// useEffect(() => {
+	// 	if (customerId) {
+	// 		const fetchCustomerData = () => {
+	// 			const loading = toast.loading("جاري تحميل بيانات العميل ..");
+	// 			apiClient
+	// 				.post("/api/Customer/GetCustomerDetails", { customerId })
+	// 				.then((res) => {
+	// 					toast.dismiss(loading);
+	// 					if (res.data.isSuccess) {
+	// 						toast.success("تم تحميل بيانات العميل.");
+	// 						setCustomerInfo(res.data.customer);
+	// 						setComment(res.data.customer.customerStatusDetails.comment);
+	// 					}
+	// 					if (!res.data.isSuccess) {
+	// 						toast.error("لقد حدث خطأ.");
+	// 					}
+	// 				})
+	// 				.catch(() => {
+	// 					toast.dismiss(loading);
+	// 					toast.error("لقد حدث خطأ.");
+	// 				});
+	// 		};
+	// 		fetchCustomerData();
+	// 	}
+	// }, [customerId]);
 	return (
 		<DashboardLayout>
 			<Toaster position="bottom-center" />
-			{!customerInfo && (
+			{isLoading && (
 				<div className="py-24 flex items-center justify-center">
 					<Loading />
 				</div>
 			)}
-			{customerInfo && (
+			{isSuccess && (
 				<>
 					<section className="w-10/12 mx-auto  shadow-lg rounded-3xl bg-white">
 						<div className="flex items-center justify-start pt-8 bg-[#FFC662]  rounded-3xl mb-10">
@@ -63,84 +78,19 @@ const AcceptedCustomer = () => {
 								<p className="text-4xl text-white">تم قبول العميل</p>
 							</div>
 						</div>
-						<div className={"py-8  px-12 border-gray-100 rounded-3xl bg-white"}>
-							{customerInfo.customerInterestedProduct && (
-								<div className="flex flex-col items-start  w-full">
-									<div className="w-full ">
-										<h2 className="mb-6  font-bold">معلومات المنتج المتوقع</h2>
-										<div className="grid grid-cols-2 gap-x-8 gap-y-6  mb-12">
-											{customerInfo.customerInterestedProduct.productName && (
-												<div className=" w-full">
-													<h5 className="my-3 ">نوع المنتج</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-														{
-															customerInfo.customerInterestedProduct
-																.productTypeName
-														}
-													</p>
-												</div>
-											)}
-											{customerInfo.customerInterestedProduct.productName && (
-												<div className=" w-full">
-													<h5 className="my-3 ">المنتج</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-														{customerInfo.customerInterestedProduct.productName}
-													</p>
-												</div>
-											)}
-											{customerInfo.customerInterestedProduct.amount && (
-												<div className=" w-full">
-													<h5 className="my-3 ">قيمة التمويل</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-														{customerInfo.customerInterestedProduct.amount}
-													</p>
-												</div>
-											)}
-											<div className=" w-full">
-												<h5 className="my-3 ">الدفعة المقدمة</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-													{customerInfo.customerInterestedProduct.downPayment}
-												</p>
-											</div>
-											{customerInfo.customerInterestedProduct
-												.totalUnitAmount && (
-												<div className=" w-full">
-													<h5 className="my-3 ">السعر الإجمالي</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-														{
-															customerInfo.customerInterestedProduct
-																.totalUnitAmount
-														}
-													</p>
-												</div>
-											)}
-											<div className=" w-full">
-												<h5 className="my-3 ">نسبة الدفعة المقدمة</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-													{
-														customerInfo.customerInterestedProduct
-															.downPaymentRate
-													}
-													%
-												</p>
-											</div>
-										</div>
-									</div>
-								</div>
-							)}
+						{/* <div className={"py-8  px-12 border-gray-100 rounded-3xl bg-white"}>
 							<div>
 								<div className="flex flex-col items-start ">
 									<h2 className="mb-6  font-bold">معلومات العميل</h2>
-
 									<div className="flex items-center mb-3">
 										<div className="ml-4  rounded-full  flex justify-center items-center">
 											{Person}
 										</div>
 										<p className="font-bold">{`${
-											customerInfo.customer.firstName || ""
-										} ${customerInfo.customer.secondName || ""} ${
-											customerInfo.customer.thirdName
-										} ${customerInfo.customer.fourthName || ""}`}</p>
+											customerInfo.firstName || ""
+										} ${customerInfo.secondName || ""} ${
+											customerInfo.middileName
+										} ${customerInfo.lastName || ""}`}</p>
 									</div>
 								</div>
 								{customerInfo.customer && (
@@ -215,66 +165,6 @@ const AcceptedCustomer = () => {
 										)}
 									</div>
 								)}
-								{/* customer segmantaion */}
-								{customerInfo && customerInfo.customerScoring && (
-									<div>
-										<h2 className="mt-12 mb-6 font-3xl font-bold ">
-											تقييم العميل
-										</h2>
-										{customerInfo && customerInfo.customerScoring && (
-											<div className="grid grid-cols-2 gap-x-8 gap-y-6">
-												<div>
-													<h5 className="my-3 font-medium">حد التمويل</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-														{customerInfo.customerScoring.exposureLimit}
-													</p>
-												</div>
-												{/* <div>
-													<h5 className="my-3 font-medium">DBR</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-														{customerInfo.customerScoring.dpr}
-													</p>
-												</div> */}
-												<div>
-													<h5 className="my-3 font-medium"> شريحة العميل</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-														{customerInfo.customerScoring.segmentation === 1 &&
-															"Prestige"}
-														{customerInfo.customerScoring.segmentation === 2 &&
-															"Elite"}
-														{customerInfo.customerScoring.segmentation === 3 &&
-															"Select Plus"}
-														{customerInfo.customerScoring.segmentation === 4 &&
-															"Select"}
-													</p>
-												</div>
-												<div>
-													<h5 className="my-3 font-medium">شريحة التسعير</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-														{customerInfo.customerScoring.pricing === 1 && "A"}
-														{customerInfo.customerScoring.pricing === 2 && "B"}
-														{customerInfo.customerScoring.pricing === 3 && "C"}
-														{customerInfo.customerScoring.pricing === 4 && "D"}
-													</p>
-												</div>
-												{/* <div>
-													<h5 className="my-3 font-medium">
-														سعر فائدة السلعة المعمرة
-													</h5>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-														{customerInfo.customerScoring.cgfRate}
-													</p>
-												</div> */}
-												<div>
-													<p className="my-3 font-medium">حد السلعة المعمرة</p>
-													<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-														{customerInfo.customerScoring.cgfLimit}
-													</p>
-												</div>
-											</div>
-										)}
-									</div>
-								)}
 							</div>
 
 							{comment && (
@@ -297,7 +187,7 @@ const AcceptedCustomer = () => {
 									</button>
 								</Link>
 							</div>
-						</div>
+						</div> */}
 					</section>
 				</>
 			)}

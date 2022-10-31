@@ -91,10 +91,6 @@ export const CustomerDetails = ({
 		id: 300,
 		name: "الاستعلام الإئتماني غير مرضي",
 	});
-	// files urls
-	const [iscoreUrl, setIscoreUrl] = useState("");
-	const [homeVisitUrl, setHomeVisitUrl] = useState("");
-	const [workVisitUrl, setWorkVisitUrl] = useState("");
 
 	// watch statue
 	const watchReasons = watch("statue");
@@ -204,7 +200,6 @@ export const CustomerDetails = ({
 			RequestForEdit(data);
 		}
 	};
-	console.log(customerInfo);
 	useEffect(() => {
 		if (customerInfo && customerInfo.customerCalculation) {
 			setValue("iScore", customerInfo.customerCalculation.iScoreScore);
@@ -463,7 +458,7 @@ export const CustomerDetails = ({
 								</p>
 							</div>
 							<div className=" w-full">
-								<h5 className="my-3 "> دخل العميل المفترض</h5>
+								<h5 className="my-3 "> دخل المعلن</h5>
 								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
 									{customerInfo.customerCalculation.assumedIncome}
 								</p>
@@ -886,23 +881,6 @@ export const CustomerDetails = ({
 		</section>
 	);
 };
-const Arrow = (
-	<svg
-		width="16"
-		height="10"
-		viewBox="0 0 16 10"
-		fill="none"
-		xmlns="http://www.w3.org/2000/svg"
-	>
-		<path
-			d="M14.9263 1.36816L7.9631 8.33134L0.999928 1.36816"
-			stroke="#14142B"
-			strokeWidth="2"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		/>
-	</svg>
-);
 
 const Person = (
 	<svg
@@ -1026,6 +1004,7 @@ const ViewEye = (
 		/>
 	</svg>
 );
+
 const FolderNameIcon = (
 	<svg
 		width="23"
@@ -1041,6 +1020,7 @@ const FolderNameIcon = (
 		/>
 	</svg>
 );
+
 const ArrowIcon = (
 	<svg
 		width="24"

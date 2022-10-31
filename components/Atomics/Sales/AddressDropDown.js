@@ -13,7 +13,7 @@ export const AddressDropDown = ({ className }) => {
 		}
 	);
 	const [govList, setGovList] = useState({
-		name: "إختيار المحافظة",
+		name: "",
 		govID: -1,
 		govs: [],
 	});
@@ -33,8 +33,8 @@ export const AddressDropDown = ({ className }) => {
 
 	const filteredPeople =
 		query === ""
-			? data?.data.data.governorateList
-			: data?.data.data.governorateList.filter((gov) => {
+			? data?.data?.data.governorateList
+			: data?.data?.data.governorateList.filter((gov) => {
 					return gov.name.toLowerCase().includes(query.toLowerCase());
 			  });
 
@@ -47,7 +47,7 @@ export const AddressDropDown = ({ className }) => {
 			)}
 			{isSuccess && (
 				<div className="grid grid-cols-3  gap-6">
-					<div className=" space-y-5">
+					{/* <div className=" space-y-5">
 						<label className="font-semibold">المحافظة</label>
 						<Listbox
 							value={govList}
@@ -92,16 +92,35 @@ export const AddressDropDown = ({ className }) => {
 								</Listbox.Options>
 							</div>
 						</Listbox>
-					</div>
-					<div className=" space-y-5">
+					</div> */}
+					<div className="space-y-5">
 						<label className="font-semibold">المحافظة</label>
-						<Combobox value={selected} onChange={setSelected}>
-							<div className="relative mt-1">
-								<div className="relative cursor-default overflow-hidden focus:border-0 focus:outline-none  sm:text-sm border-0">
+						<Combobox
+							value={selected}
+							onChange={(e) => {
+								setSelected(e);
+								setGovList(e);
+								setCityList({
+									name: "إختيار المدينة",
+									cityID: -1,
+									cityList: e.cityList,
+								});
+								setDistrictList({
+									name: "إختيار المنطقة",
+									districtID: -1,
+									districtList: [],
+								});
+							}}
+						>
+							<div className="relative">
+								<div className="relative cursor-default overflow-hidden focus:border-0 focus:outline-none border-0 rounded-xl">
 									<Combobox.Input
 										className="focus:border-none border-none focus:outline-none focus:ring-0 focus:outline-offset-0  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
 										displayValue={(person) => person.name}
-										onChange={(event) => setQuery(event.target.value)}
+										onChange={(e) => {
+											setQuery(e.target.value);
+										}}
+										placeholder="إختيار المحافظة"
 									/>
 									<Combobox.Button className="absolute inset-y-0 focus:outline-none focus:border-none left-0 flex items-center px-8">
 										<svg
@@ -132,20 +151,18 @@ export const AddressDropDown = ({ className }) => {
 									leaveTo="opacity-0"
 									afterLeave={() => setQuery("")}
 								>
-									<Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+									<Combobox.Options className="absolute w-full    p-4 rounded-3xl shadow-lg z-10 bg-white overflow-auto max-h-60  scrollbar-thin ">
 										{filteredPeople.length === 0 && query !== "" ? (
-											<div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+											<li className="relative cursor-default select-none py-2 px-4 text-gray-700">
 												لا يوجد شيء
-											</div>
+											</li>
 										) : (
 											filteredPeople.map((person) => (
 												<Combobox.Option
 													key={person.id}
 													className={({ active }) =>
-														`relative cursor-default select-none py-2 pl-10 pr-4 ${
-															active
-																? "bg-amber-100 text-amber-900"
-																: "text-gray-900"
+														`relative cursor-default select-none p-4 rounded-2xl ${
+															active && "bg-amber-100"
 														}`
 													}
 													value={person}
@@ -191,7 +208,7 @@ export const AddressDropDown = ({ className }) => {
 									districtList: e.districtList,
 								});
 							}}
-							disabled={govList.govID === -1}
+							disabled={selected.govID === -1}
 						>
 							<div className="relative ">
 								<Listbox.Button

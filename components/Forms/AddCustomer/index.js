@@ -14,7 +14,6 @@ import { JobDropDown } from "../../Atomics/Sales/JobDropDown";
 import { JobSectorDropDown } from "../../Atomics/Sales/JobSectorDropDown";
 import { OwnHomeDropDown } from "../../Atomics/Sales/OwnHomDropDown";
 import { OwnSecondHomeDropDown } from "../../Atomics/Sales/OwnSecondHomeDropDown";
-import { ProductsDropDown } from "../../Atomics/Sales/ProductDropDown";
 
 const handleCalculateDownPaymentRate = (dp, la) => {
 	return ((dp * 100) / (la + dp)).toFixed(2);
@@ -22,7 +21,7 @@ const handleCalculateDownPaymentRate = (dp, la) => {
 
 const AddCustomerForm = () => {
 	const router = useRouter();
-	const { data: session } = useSession();
+
 	const {
 		register,
 		handleSubmit,
@@ -42,16 +41,6 @@ const AddCustomerForm = () => {
 	// states
 	const [downPaymentRate, setDownPaymentRate] = useState(0);
 
-	// product
-	const [selectedCategoryProduct, setSelectedCategoryProduct] = useState({
-		name: "يرجي الإختيار",
-		id: -1,
-		product: [],
-	});
-	const [selectedProduct, setSelectedProduct] = useState({
-		name: "يرجي الإختيار",
-		id: -1,
-	});
 	// customer
 	const [customerId, setCustomerId] = useState(null);
 	const [customerDocs, setCustomerDocs] = useState(null);
@@ -151,7 +140,6 @@ const AddCustomerForm = () => {
 				},
 			})
 			.then(({ data }) => {
-				console.log(data, "datratatatata");
 				toast.dismiss(loading);
 				if (data.isSuccess) {
 					toast.success("تم العثور على العميل.");
@@ -171,8 +159,6 @@ const AddCustomerForm = () => {
 					setValue("businessAddress", customer.businessAddress);
 					setValue("businessName", customer.businessName);
 					setValue("Income", customer.monthlyIncome);
-					setValue("LoanAmount", customer.amount);
-					setValue("DownPayment", customer.downPayment);
 				}
 			})
 			.catch(() => {
@@ -606,63 +592,3 @@ const SendIcon = (
 		/>
 	</svg>
 );
-
-// const handleUpdateCustomerDate = (data) => {
-// 	const loading = toast.loading("جاري تحديث بيانات العميل..");
-// 	apiClient
-// 		.post("/api/Customer/UpdateCustomer", {
-// 			customer: {
-// 				id: customerId,
-// 				firstName: data.FirstName,
-// 				secondName: data.SecondName,
-// 				thirdName: data.ThirdName,
-// 				fourthName: data.LastName,
-// 				idno: data.nationalId,
-// 				officeJoiningDate: new Date(), //today date
-// 				officeId: Number(session.user.officeId),
-// 				officeName: "",
-// 				updatedBy: Number(session.user.id),
-// 				statues: null,
-// 				sales: session.user.id,
-// 				salesName: "",
-// 			},
-// 			extraData: {
-// 				homeAddress: data.Address,
-// 				mobileNumber: data.PhoneNumber,
-// 				emailAddress: data.Email,
-// 				buesinessDescription: data.JobTitle,
-// 				yearsInBusiness: Number(data.yearsInBusiness),
-// 				monthlyIncome: Number(data.Income),
-// 				gender: gender.id,
-// 				genderStr: "",
-// 				dateOfBirth: dateOfBirth,
-// 				educationLevelCd: 0,
-// 				inquireAddress: data.InvestigationAddress,
-// 				mobileNumber2: data.SecPhoneNumber,
-// 			},
-// 			interestedProduct: {
-// 				productTypeId: Number(selectedCategoryProduct.categoryId),
-// 				productTypeName: "",
-// 				productId: Number(selectedProduct.id),
-// 				productName: "",
-// 				amount: Number(data.LoanAmount),
-// 				downPayment: Number(data.DownPayment),
-// 				insertedOnDate: new Date(),
-// 				insertedOnUser: Number(session.user.id),
-// 			},
-// 		})
-// 		.then(({ data }) => {
-// 			toast.dismiss(loading);
-// 			if (data.isSuccess) {
-// 				toast.success("تم تحديث بيانات العميل بنجاح.");
-// 			}
-// 			if (!data.isSuccess) {
-// 				toast.error("لقد حدث خطأ.");
-// 			}
-// 			return data;
-// 		})
-// 		.catch(() => {
-// 			toast.dismiss(loading);
-// 			toast.error("لقد حدث خطأ.");
-// 		});
-// };

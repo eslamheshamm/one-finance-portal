@@ -8,7 +8,7 @@ import { Transition, Listbox } from "@headlessui/react";
 import toast, { Toaster } from "react-hot-toast";
 import "moment/locale/ar";
 import moment from "moment";
-import { QueryCache } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const filters = [
 	{ id: 1, name: "الكل", value: "All" },
@@ -18,46 +18,16 @@ const filters = [
 ];
 
 const CustomersQueue = () => {
-	const { data: session, status } = useSession();
-	const [customersData, setCustomerData] = useState(null);
-	const [isLoading, setLoading] = useState(false);
-
+	const { isLoading, isError, isSuccess, data } = useQuery(
+		["pendingCustomersQueue"],
+		async () => {
+			return await apiClient.get("/api/Customer/GetPendingCustomers");
+		}
+	);
 	const [q, setQ] = useState("");
-	const [searchParam] = useState(["idno"]);
+	const [searchParam] = useState(["nationalID"]);
 	const [filterParam, setFilterParam] = useState(filters[0]);
 
-	const queryCache = new QueryCache({
-		onError: (error) => {
-			console.log(error);
-		},
-		onSuccess: (data) => {
-			console.log(data);
-		},
-	});
-
-	const query = queryCache.find(["products"]);
-	console.log(query);
-	const fetchData = () => {
-		const loading = toast.loading("جاري تحميل البيانات..");
-		apiClient
-			.get("/api/Customer/GetPendingCustomers")
-			.then((res) => {
-				toast.dismiss(loading);
-				if (res.data.isSuccess) {
-					toast.success("تم تحميل البيانات بنجاح");
-					setLoading(true);
-					setCustomerData(res.data.data);
-				}
-			})
-			.catch((error) => {
-				toast.dismiss(loading);
-				toast.error("لقد حدث خطأ, يرجي المحاولة مرة أخري.");
-				console.log(error, "error");
-			});
-	};
-	useEffect(() => {
-		fetchData();
-	}, []);
 	function search(items) {
 		return items.filter((item) => {
 			if (item.status == filterParam.value) {
@@ -75,23 +45,6 @@ const CustomersQueue = () => {
 			}
 		});
 	}
-
-	// if (
-	// 	status === "unauthenticated" ||
-	// 	!session ||
-	// 	!session.user ||
-	// 	session.user.roleId !== 4
-	// ) {
-	// 	return (
-	// 		<DashboardLayout>
-	// 			<div className="h-full w-10/12 mx-auto flex justify-center ">
-	// 				<h2 className="font-bold text-3xl ">
-	// 					ليس لك الصلاحية للدخول علي هذه الصفحة!
-	// 				</h2>
-	// 			</div>
-	// 		</DashboardLayout>
-	// 	);
-	// }
 
 	return (
 		<DashboardLayout lang={"ar"}>
@@ -161,7 +114,7 @@ const CustomersQueue = () => {
 				</form>
 			</section>
 
-			{customersData && (
+			{isSuccess && (
 				<section>
 					<div className="my-12  mx-auto w-11/12 ">
 						<div className="overflow-x-auto rounded-3xl  shadow-sm" dir="rtl">
@@ -185,15 +138,13 @@ const CustomersQueue = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{customersData &&
-										search(customersData).map((item, index) => {
-											if (item) {
-												return (
-													<>
-														<CustomerRequestReview index={index++} {...item} />
-													</>
-												);
-											}
+									{data?.data?.data &&
+										search(data?.data?.data).map((item, index) => {
+											return (
+												<>
+													<CustomerRequestReview index={index++} {...item} />
+												</>
+											);
 										})}
 								</tbody>
 							</table>
@@ -207,17 +158,18 @@ const CustomersQueue = () => {
 export default CustomersQueue;
 
 const CustomerRequestReview = ({
-	sales,
+	customerName,
+	salesName,
 	office,
-	idno,
+	nationalID,
 	id,
 	status,
 	...props
 }) => {
-	const submittedOnDateFormated = moment(props.submittedOnDate).format(
+	const submittedOnDateFormated = moment(props.submittedDate).format(
 		"DD MMM  - h:mm:ss a"
 	);
-	const updatedOnDateFormated = moment(props.updatedOnDate).format(
+	const updatedOnDateFormated = moment(props.updatedDate).format(
 		"DD MMM  - h:mm:ss a"
 	);
 	return (
@@ -225,15 +177,15 @@ const CustomerRequestReview = ({
 			<td className="  px-6 py-2 ">
 				<div className="flex items-center">
 					{/* <div className="ml-4">{Person}</div> */}
-					<p>{`${props.firstName} ${props.secondName} ${props.thirdName} ${props.fourthName}`}</p>
+					<p>{customerName}</p>
 				</div>
 			</td>
 			<td className="px-6 py-2">
-				<div className="flex items-center">{idno}</div>
+				<div className="flex items-center">{nationalID}</div>
 			</td>
 
 			<td className="px-6 py-2">
-				<p>{sales}</p>
+				<p>{salesName}</p>
 			</td>
 			<td className="px-6 py-2">
 				<div className="flex items-center text-center w-full">
