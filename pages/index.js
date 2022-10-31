@@ -31,7 +31,6 @@ export default function Home() {
 	if (status === "unauthenticated") {
 		router.push("/login");
 	}
-	console.log(session.user);
 	if (status === "authenticated") {
 		if (session.user.data.roleID === 4) {
 			router.push("/customers/add");
