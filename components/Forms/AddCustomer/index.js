@@ -15,13 +15,8 @@ import { JobSectorDropDown } from "../../Atomics/Sales/JobSectorDropDown";
 import { OwnHomeDropDown } from "../../Atomics/Sales/OwnHomDropDown";
 import { OwnSecondHomeDropDown } from "../../Atomics/Sales/OwnSecondHomeDropDown";
 
-const handleCalculateDownPaymentRate = (dp, la) => {
-	return ((dp * 100) / (la + dp)).toFixed(2);
-};
-
 const AddCustomerForm = () => {
 	const router = useRouter();
-
 	const {
 		register,
 		handleSubmit,
@@ -35,24 +30,59 @@ const AddCustomerForm = () => {
 			DownPayment: null,
 			mobileNumber: null,
 			mobileNumber2: null,
+			nationalID: "",
 		},
-		mode: "onBlur",
+		mode: "oChange",
 	});
-	// states
-	const [downPaymentRate, setDownPaymentRate] = useState(0);
-
 	// customer
 	const [customerId, setCustomerId] = useState(null);
 	const [customerDocs, setCustomerDocs] = useState(null);
+
 	// watch
 	const idnoWatch = watch("nationalId");
-	const watchLoanAmount = watch("LoanAmount");
-	const downPaymentWatch = watch("DownPayment");
-	// teeest
+	// lokups states
+	const [govList, setGovList] = useState({
+		name: "",
+		govID: -1,
+		govs: [],
+	});
+	const [cityList, setCityList] = useState({
+		name: "",
+		cityID: -1,
+		districtList: [],
+	});
+	const [districtList, setDistrictList] = useState({
+		name: "",
+		districtID: -1,
+		districtList: [],
+	});
+	// cars drop downs
+
+	const [carsList, setCarsList] = useState({
+		name: "",
+		vehicleID: -1,
+		vehicleModelList: [],
+	});
+	const [carsModel, setCarModel] = useState({
+		name: "",
+		vehicleModelID: -1,
+	});
+	// job drop down
+	const [jobSector, setJobSector] = useState({
+		name: "",
+		clubID: -1,
+	});
+	const [jobsList, setJobsList] = useState({
+		name: "",
+		jobID: -1,
+	});
+	const [clubsList, setClubsList] = useState({
+		name: "إختيار النادي",
+		clubID: -1,
+	});
 	const { dateOfBirth, gender } = useIdnoInfo(idnoWatch);
 
 	const handleSaveCustomer = (data) => {
-		console.log(data);
 		const loading = toast.loading("جاري حفظ العميل..");
 		apiClient
 			.post("/api/Customer/SaveCustomer", {
@@ -77,11 +107,17 @@ const AddCustomerForm = () => {
 					businessName: data.businessName,
 					businessAddress: data.businessAddress,
 				},
-				customerInterestedDTO: {
-					productTypeID: Number(selectedCategoryProduct.id),
-					productID: Number(selectedProduct.id),
-					amount: Number(data.LoanAmount),
-					downPayment: Number(data.DownPayment),
+				customerQuestionnaireDTO: {
+					sectorID: 0,
+					clubID: 0,
+					ownershipHomeID: 0,
+					secondHomeID: 0,
+					govID: 0,
+					districtID: 0,
+					jobID: 0,
+					modelYear: 0,
+					vehicleModelID: 0,
+					vehicleID: 0,
 				},
 			})
 			.then(({ data }) => {
@@ -118,18 +154,7 @@ const AddCustomerForm = () => {
 				toast.error("لقد حدث خطأ في الأنترنت.");
 			});
 	};
-	const GetCustomerDocs = () => {
-		apiClient
-			.post("/api/Customer/GetRequestedCustomerDocuments", {
-				customerId: customerId,
-			})
-			.then((res) => {
-				setCustomerDocs(res.data.customerUploadDocuments);
-			})
-			.catch(() => {
-				toast.error("لقد حدث خطأ في تحميل المستندات..");
-			});
-	};
+
 	const handlNationalIdSearch = () => {
 		const loading = toast.loading("جاري البحث عن العميل..");
 		const Idno = getValues("nationalId");
@@ -167,24 +192,26 @@ const AddCustomerForm = () => {
 			});
 	};
 
-	useEffect(() => {
-		if (watchLoanAmount > 0 && downPaymentWatch >= 0) {
-			setDownPaymentRate(
-				handleCalculateDownPaymentRate(
-					Number(downPaymentWatch),
-					Number(watchLoanAmount)
-				)
-			);
-		}
-	}, [watchLoanAmount, downPaymentWatch, setDownPaymentRate, downPaymentRate]);
-
+	const GetCustomerDocs = () => {
+		apiClient
+			.post("/api/Customer/GetRequestedCustomerDocuments", {
+				customerId: customerId,
+			})
+			.then((res) => {
+				setCustomerDocs(res.data.customerUploadDocuments);
+			})
+			.catch(() => {
+				toast.error("لقد حدث خطأ في تحميل المستندات..");
+			});
+	};
 	useEffect(() => {
 		if (customerId) {
 			GetCustomerDocs();
 		}
 	}, [customerId]);
-
-	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0  focus:ring-0 `;
+	const nationalIdButtonClass =
+		" cursor-pointer  rounded-full font-bold   flex justify-center items-center  p-6  w-full  text-black   bg-[#EDAA00]  transition-all duration-200";
+	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0 ring-0 focus:ring-0 `;
 	return (
 		<section className="w-10/12 mx-auto ">
 			<Toaster position="bottom-center" />
@@ -203,7 +230,7 @@ const AddCustomerForm = () => {
 							<div>
 								<input
 									type="number"
-									placeholder="29945879254946"
+									placeholder="يرجي إدخال الرقم القومي"
 									{...register("nationalId", {
 										required: true,
 										minLength: 14,
@@ -216,30 +243,21 @@ const AddCustomerForm = () => {
 						<div>
 							<div
 								className={classNames(
-									" cursor-pointer  rounded-full font-bold   flex justify-center items-center  p-6  w-full  text-black   bg-[#EDAA00]  transition-all duration-200",
-									(errors.nationalId?.type === "minLength" ||
-										errors.nationalId?.type === "maxLength" ||
-										errors.nationalId?.type === "required") &&
+									nationalIdButtonClass,
+									(Number(idnoWatch) < 14 || Number(idnoWatch) > 14) &&
 										"bg-[#999999] text-[#14142B]"
 								)}
 								onClick={(e) => {
 									e.preventDefault();
 									handlNationalIdSearch(e);
 								}}
-								disabled={
-									errors.nationalId?.type === "minLength" ||
-									errors.nationalId?.type === "maxLength" ||
-									errors.nationalId?.type === "required"
-								}
+								disabled={Number(idnoWatch) < 14 || Number(idnoWatch) > 14}
 							>
 								<span className="ml-4 font-bold">بحث</span>
 								{SearchIcon}
 							</div>
 						</div>
 					</div>
-					<p className="mt-2 text-red-400">
-						{errors.nationalId?.type === "required" && "يرجي إدخال رقم قومي "}
-					</p>
 					<p className="mt-2 text-red-400">
 						{(errors.nationalId?.type === "minLength" ||
 							errors.nationalId?.type === "maxLength") &&
@@ -300,7 +318,14 @@ const AddCustomerForm = () => {
 					</div>
 					{/* Address  */}
 					<div className="flex flex-col gap-5">
-						<AddressDropDown />
+						<AddressDropDown
+							govList={govList}
+							setGovList={setGovList}
+							cityList={cityList}
+							setCityList={setCityList}
+							districtList={districtList}
+							setDistrictList={setDistrictList}
+						/>
 						<div className=" w-full  col-span-2 space-y-3">
 							<label className="font-semibold">العنوان</label>
 							<input
@@ -330,18 +355,17 @@ const AddCustomerForm = () => {
 								الايميل
 							</label>
 							<input
-								type="string"
+								type="email"
 								placeholder="الايميل الشخصي"
 								{...register("Email", {
 									pattern: /\S+@\S+\.\S+/,
 								})}
-								className={buttonClass}
+								className={classNames(
+									buttonClass,
+									errors.Email?.type === "pattern" &&
+										"border-2 focus:border-red-500 focus:outline-0 focus:outline-none border-red-500"
+								)}
 							/>
-							{errors.Email?.type === "pattern" && (
-								<p className="text-red-400 font-semibold">
-									يرجي ادخال إيميل صحيح
-								</p>
-							)}
 						</div>
 						{/* Phone */}
 						<div className=" w-full space-y-3">
@@ -354,13 +378,12 @@ const AddCustomerForm = () => {
 								{...register("PhoneNumber", {
 									pattern: /^01[0125][0-9]{8}$/gm,
 								})}
-								className={buttonClass}
+								className={classNames(
+									buttonClass,
+									errors.PhoneNumber?.type === "pattern" &&
+										"border-2 focus:border-red-500 focus:outline-0 focus:outline-none border-red-500"
+								)}
 							/>
-							{errors.PhoneNumber?.type === "pattern" && (
-								<p className="text-red-400 font-semibold">
-									يرجي ادخال رقم هاتف صحيح
-								</p>
-							)}
 						</div>
 						<div className=" w-full space-y-3 ">
 							<label htmlFor="SecPhoneNumber" className="font-semibold">
@@ -447,7 +470,12 @@ const AddCustomerForm = () => {
 							معلومات إضافية
 						</h2>
 						<div className="grid grid-cols-3 gap-5">
-							<CarsDropDown />
+							<CarsDropDown
+								carsList={carsList}
+								setCarsList={setCarsList}
+								setCarModel={setCarModel}
+								carsModel={carsModel}
+							/>
 							<div className=" w-full space-y-3">
 								<label htmlFor="CarModelYear" className="font-semibold">
 									سنة الصنع
@@ -461,9 +489,15 @@ const AddCustomerForm = () => {
 							</div>
 						</div>
 						<div className="grid grid-cols-3 gap-5">
-							<JobSectorDropDown />
-							<JobDropDown />
-							<ClubsDropDown />
+							<JobSectorDropDown
+								jobSector={jobSector}
+								setJobSector={setJobSector}
+							/>
+							<JobDropDown jobsList={jobsList} setJobsList={setJobsList} />
+							<ClubsDropDown
+								clubsList={clubsList}
+								setClubsList={setClubsList}
+							/>
 						</div>
 						<div className="grid grid-cols-2 gap-5">
 							<OwnHomeDropDown />

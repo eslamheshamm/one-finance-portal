@@ -20,29 +20,24 @@ export default NextAuth({
 				// new test backend  https://192.168.100.2:8001/
 				// new tst 127.0.0.1:5003
 				try {
-					const response = await axios
-						.post("http://192.168.100.2:8002/api/User/UserLogin", {
+					const res = await axios.post(
+						"http://192.168.100.2:8002/api/User/UserLogin",
+						{
 							userName: credentials.username,
 							password: credentials.password,
-						})
-						.then((res) => {
-							console.log(res.data);
-							return res.data;
-						})
-						.catch((err) => {
-							console.log(err, "error");
-						});
-					const data = await response;
-					console.log(data.isSuccess);
-					if (data.isSuccess) {
+						},
+						{
+							timeout: 2000000,
+						}
+					);
+					if (res.data.isSuccess) {
 						return {
-							token: data.token,
-							...data,
+							token: res.data.token,
+							...res.data,
 						};
 					}
 					return null;
 				} catch (err) {
-					// Handle Error Here
 					console.error(err, "error");
 					return null;
 				}
@@ -51,7 +46,7 @@ export default NextAuth({
 	],
 	session: {
 		maxAge: 60 * 60 * 7, // 7 houres
-		keepAlive: 60 * 60 * 7,
+		keepAlive: 60 * 60 * 7, // 7 hours
 	},
 	callbacks: {
 		jwt: async ({ token, user }) => {
