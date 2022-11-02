@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const OwnSecondHomeDropDown = ({ secondHome, setSecondHome }) => {
 	const { isLoading, isError, isSuccess, data } = useQuery(
-		["secondHome"],
+		["secondHomeLookup"],
 		async () => {
 			return await apiClient.get("/api/Lookup/GetLookupSecondHome");
 		}

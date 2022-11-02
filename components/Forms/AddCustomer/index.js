@@ -106,7 +106,7 @@ const AddCustomerForm = () => {
 					gender: gender.id,
 					dateOfBirth: dateOfBirth,
 					homeAddress: data.Address,
-					primaryPhone: data.SecPhoneNumber,
+					primaryPhone: data.PhoneNumber,
 					anotherPhone: data.SecPhoneNumber,
 					email: data.Email,
 					businessDescription: data.JobTitle,
@@ -134,7 +134,7 @@ const AddCustomerForm = () => {
 				console.log(data);
 				if (data.isSuccess) {
 					toast.success("تم حفظ العميل بنجاح.");
-					setCustomerId(data.customerID);
+					setCustomerId(data.data.customerID);
 				}
 			})
 			.catch(() => {
@@ -178,6 +178,7 @@ const AddCustomerForm = () => {
 				},
 			})
 			.then(({ data }) => {
+				console.log(data);
 				toast.dismiss(loading);
 				if (data.isSuccess) {
 					toast.success("تم العثور على العميل.");
@@ -197,6 +198,10 @@ const AddCustomerForm = () => {
 					setValue("businessAddress", customer.businessAddress);
 					setValue("businessName", customer.businessName);
 					setValue("Income", customer.monthlyIncome);
+					setGovList({
+						name: customer.govNameAR,
+						govID: customer.govID,
+					});
 				}
 			})
 			.catch(() => {
@@ -207,21 +212,21 @@ const AddCustomerForm = () => {
 
 	const GetCustomerDocs = () => {
 		apiClient
-			.post("/api/Customer/GetRequestedCustomerDocuments", {
-				customerId: customerId,
+			.post("/api/Document/GetDocument", {
+				id: "47",
+				type: 1,
 			})
 			.then((res) => {
-				setCustomerDocs(res.data.customerUploadDocuments);
+				console.log(res);
+				setCustomerDocs(res.data.data);
 			})
 			.catch(() => {
 				toast.error("لقد حدث خطأ في تحميل المستندات..");
 			});
 	};
-	useEffect(() => {
-		if (customerId) {
-			GetCustomerDocs();
-		}
-	}, [customerId]);
+	// useEffect(() => {
+	// 	GetCustomerDocs();
+	// }, [customerId]);
 	const nationalIdButtonClass =
 		" cursor-pointer  rounded-full font-bold   flex justify-center items-center  p-6  w-full  text-black   bg-[#EDAA00]  transition-all duration-200";
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0 ring-0 focus:ring-0 `;
@@ -256,15 +261,15 @@ const AddCustomerForm = () => {
 						<div>
 							<div
 								className={classNames(
-									nationalIdButtonClass,
-									(Number(idnoWatch) < 14 || Number(idnoWatch) > 14) &&
-										"bg-[#999999] text-[#14142B]"
+									nationalIdButtonClass
+									// (Number(idnoWatch) < 14 || Number(idnoWatch) > 14) &&
+									// 	"bg-[#999999] text-[#14142B]"
 								)}
 								onClick={(e) => {
 									e.preventDefault();
 									handlNationalIdSearch(e);
 								}}
-								disabled={Number(idnoWatch) < 14 || Number(idnoWatch) > 14}
+								// disabled={Number(idnoWatch) < 14 || Number(idnoWatch) > 14}
 							>
 								<span className="ml-4 font-bold">بحث</span>
 								{SearchIcon}
@@ -558,7 +563,7 @@ const AddCustomerForm = () => {
 										doc={doc}
 										EntityType={1}
 										EntityID={customerId}
-										fileName={doc.documentDescription}
+										fileName={doc.typeName}
 									/>
 								);
 							})}

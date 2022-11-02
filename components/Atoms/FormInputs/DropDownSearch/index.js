@@ -70,9 +70,9 @@ export const DropDownSearch = ({
 											لا يوجد شيء
 										</li>
 									) : (
-										filterItems.map((item) => (
+										filterItems.map((item, idx) => (
 											<Combobox.Option
-												key={items.id}
+												key={idx++}
 												className={({ active, selected }) =>
 													`relative cursor-default select-none p-4 my-2 rounded-2xl ${
 														selected && "bg-amber-100"
