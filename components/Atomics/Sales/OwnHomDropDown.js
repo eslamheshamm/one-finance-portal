@@ -4,17 +4,14 @@ import apiClient from "../../../services/apiClient";
 import { Loading } from "../Loading";
 import { useQuery } from "@tanstack/react-query";
 
-export const OwnHomeDropDown = () => {
+export const OwnHomeDropDown = ({ home, setHome }) => {
 	const { isLoading, isError, isSuccess, data } = useQuery(
-		["firstHome"],
+		["firstHomeLookup"],
 		async () => {
 			return await apiClient.get("/api/Lookup/GetLookupOwnershipHome");
 		}
 	);
-	const [home, setHome] = useState({
-		status: "يرجي الإختيار",
-		ownershipHomeID: -1,
-	});
+
 	return (
 		<>
 			{isLoading && (

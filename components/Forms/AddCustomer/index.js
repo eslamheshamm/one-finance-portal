@@ -70,15 +70,24 @@ const AddCustomerForm = () => {
 	// job drop down
 	const [jobSector, setJobSector] = useState({
 		name: "",
-		clubID: -1,
+		sectorID: -1,
 	});
 	const [jobsList, setJobsList] = useState({
 		name: "",
 		jobID: -1,
 	});
 	const [clubsList, setClubsList] = useState({
-		name: "إختيار النادي",
+		name: "",
 		clubID: -1,
+	});
+	// own home drop down
+	const [home, setHome] = useState({
+		status: "يرجي الإختيار",
+		ownershipHomeID: -1,
+	});
+	const [secondHome, setSecondHome] = useState({
+		status: "يرجي الإختيار",
+		secondHomeID: -1,
 	});
 	const { dateOfBirth, gender } = useIdnoInfo(idnoWatch);
 
@@ -108,20 +117,21 @@ const AddCustomerForm = () => {
 					businessAddress: data.businessAddress,
 				},
 				customerQuestionnaireDTO: {
-					sectorID: 0,
-					clubID: 0,
-					ownershipHomeID: 0,
-					secondHomeID: 0,
-					govID: 0,
-					districtID: 0,
-					jobID: 0,
-					modelYear: 0,
-					vehicleModelID: 0,
-					vehicleID: 0,
+					sectorID: jobSector.sectorID,
+					clubID: clubsList.clubID,
+					ownershipHomeID: home.ownershipHomeID,
+					secondHomeID: secondHome.secondHomeID,
+					govID: govList.govID,
+					districtID: districtList.districtID,
+					jobID: jobsList.jobID,
+					modelYear: data.CarModelYear,
+					vehicleModelID: carsModel.vehicleModelID,
+					vehicleID: carsList.vehicleID,
 				},
 			})
 			.then(({ data }) => {
 				toast.dismiss(loading);
+				console.log(data);
 				if (data.isSuccess) {
 					toast.success("تم حفظ العميل بنجاح.");
 					setCustomerId(data.customerID);
@@ -130,6 +140,9 @@ const AddCustomerForm = () => {
 			.catch(() => {
 				toast.dismiss(loading);
 				toast.error("لقد حدث خطأ في الأنترنت.");
+			})
+			.finally(() => {
+				toast.dismiss(loading);
 			});
 	};
 	// 29910012125319
@@ -500,8 +513,11 @@ const AddCustomerForm = () => {
 							/>
 						</div>
 						<div className="grid grid-cols-2 gap-5">
-							<OwnHomeDropDown />
-							<OwnSecondHomeDropDown />
+							<OwnHomeDropDown home={home} setHome={setHome} />
+							<OwnSecondHomeDropDown
+								secondHome={secondHome}
+								setSecondHome={setSecondHome}
+							/>
 						</div>
 					</div>
 				</div>
