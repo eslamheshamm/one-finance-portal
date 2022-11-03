@@ -45,6 +45,7 @@ const RiskCustomerPreview = () => {
 				toast.dismiss(loadingCustomerInfo);
 				if (res.data.isSuccess) {
 					setCustomerInfo(res.data.data);
+					console.log(res.data.data);
 					toast.success("تم تحميل بيانات العميل بنجاح");
 				}
 			})
@@ -53,41 +54,41 @@ const RiskCustomerPreview = () => {
 				toast.error("لقد حدث خطأ في الأنترنت.");
 			});
 	};
-	const GetCustomerDocs = () => {
-		apiClient
-			.get("/api/Document/GetDocument", {
-				id: id,
-				type: 1,
-			})
-			.then((res) => {
-				if (res.data.isSuccess) {
-					setCustomerDocs(res.data.customerUploadDocuments);
-				}
-			})
-			.catch(() => {
-				toast.error("لقد حدث خطأ في الأنترنت.");
-			});
-	};
-	const GetCusomerRequestHistory = () => {
-		apiClient
-			.post("/api/Customer/GetCustomerRequestHistory", {
-				CustomerId: customerId,
-			})
-			.then((res) => {
-				if (res.data.isSuccess) {
-					setRequestHistory(res.data.customerHistory);
-				}
-			})
-			.catch(() => {
-				toast.error("لقد حدث خطأ في الأنترنت.");
-			});
-	};
+	// const GetCustomerDocs = () => {
+	// 	apiClient
+	// 		.get("/api/Document/GetDocument", {
+	// 			id: id,
+	// 			type: 1,
+	// 		})
+	// 		.then((res) => {
+	// 			if (res.data.isSuccess) {
+	// 				setCustomerDocs(res.data.customerUploadDocuments);
+	// 			}
+	// 		})
+	// 		.catch(() => {
+	// 			toast.error("لقد حدث خطأ في الأنترنت.");
+	// 		});
+	// };
+	// const GetCusomerRequestHistory = () => {
+	// 	apiClient
+	// 		.post("/api/Customer/GetCustomerRequestHistory", {
+	// 			CustomerId: customerId,
+	// 		})
+	// 		.then((res) => {
+	// 			if (res.data.isSuccess) {
+	// 				setRequestHistory(res.data.customerHistory);
+	// 			}
+	// 		})
+	// 		.catch(() => {
+	// 			toast.error("لقد حدث خطأ في الأنترنت.");
+	// 		});
+	// };
 
 	useEffect(() => {
 		if (customerId) {
 			GetCusomerInfo();
-			GetCustomerDocs();
-			GetCusomerRequestHistory();
+			// GetCustomerDocs();
+			// GetCusomerRequestHistory();
 		}
 	}, [customerId]);
 

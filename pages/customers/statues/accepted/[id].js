@@ -13,48 +13,53 @@ const AcceptedCustomer = () => {
 	const { id } = query;
 	const [customerInfo, setCustomerInfo] = useState(null);
 	const [comment, setComment] = useState("");
-	const { isLoading, isError, isSuccess, data } = useQuery(
-		["getAcceptedCustomerDetails"],
 
-		async () => {
-			const res = await apiClient.get("/api/Customer/GetCustomerDetailsByID", {
-				params: { CustomerID: id },
-			});
-			return res;
+	const [isLoading, setIsLoading] = useState(true);
+	const [isSuccess, setIsSuccess] = useState(false);
+	// const { isLoading, isError, isSuccess, data } = useQuery(
+	// 	["getAcceptedCustomerDetails"],
+
+	// 	async () => {
+	// 		const res = await apiClient.get("/api/Customer/GetCustomerDetailsByID", {
+	// 			params: { CustomerID: id },
+	// 		});
+	// 		return res;
+	// 	}
+	// );
+
+	// useEffect()
+	// console.log(data?.data?.data);
+
+	useEffect(() => {
+		if (id) {
+			const fetchCustomerData = () => {
+				const loading = toast.loading("جاري تحميل بيانات العميل ..");
+				apiClient
+					.get("/api/Customer/GetCustomerDetailsByID", {
+						params: {
+							CustomerID: id,
+						},
+					})
+					.then((res) => {
+						toast.dismiss(loading);
+						if (res.data.isSuccess) {
+							toast.success("تم تحميل بيانات العميل.");
+							setIsSuccess(true);
+							setCustomerInfo(res.data.data);
+							console.log(res.data.data);
+						}
+						if (!res.data.isSuccess) {
+							toast.error("لقد حدث خطأ.");
+						}
+					})
+					.catch(() => {
+						toast.dismiss(loading);
+						toast.error("لقد حدث خطأ.");
+					});
+			};
+			fetchCustomerData();
 		}
-	);
-	console.log(data);
-	// useEffect(() => {
-	// 	if (isSuccess) {
-	// 		setCustomerInfo(data.data.data);
-	// 	}
-	// }, [data, isSuccess]);
-	// console.log(customerInfo, "infooo");
-	// useEffect(() => {
-	// 	if (customerId) {
-	// 		const fetchCustomerData = () => {
-	// 			const loading = toast.loading("جاري تحميل بيانات العميل ..");
-	// 			apiClient
-	// 				.post("/api/Customer/GetCustomerDetails", { customerId })
-	// 				.then((res) => {
-	// 					toast.dismiss(loading);
-	// 					if (res.data.isSuccess) {
-	// 						toast.success("تم تحميل بيانات العميل.");
-	// 						setCustomerInfo(res.data.customer);
-	// 						setComment(res.data.customer.customerStatusDetails.comment);
-	// 					}
-	// 					if (!res.data.isSuccess) {
-	// 						toast.error("لقد حدث خطأ.");
-	// 					}
-	// 				})
-	// 				.catch(() => {
-	// 					toast.dismiss(loading);
-	// 					toast.error("لقد حدث خطأ.");
-	// 				});
-	// 		};
-	// 		fetchCustomerData();
-	// 	}
-	// }, [customerId]);
+	}, [id]);
 	return (
 		<DashboardLayout>
 			<Toaster position="bottom-center" />
@@ -78,7 +83,7 @@ const AcceptedCustomer = () => {
 								<p className="text-4xl text-white">تم قبول العميل</p>
 							</div>
 						</div>
-						{/* <div className={"py-8  px-12 border-gray-100 rounded-3xl bg-white"}>
+						<div className={"py-8  px-12 border-gray-100 rounded-3xl bg-white"}>
 							<div>
 								<div className="flex flex-col items-start ">
 									<h2 className="mb-6  font-bold">معلومات العميل</h2>
@@ -93,73 +98,78 @@ const AcceptedCustomer = () => {
 										} ${customerInfo.lastName || ""}`}</p>
 									</div>
 								</div>
-								{customerInfo.customer && (
+								{customerInfo && (
 									<div className="grid grid-cols-2 gap-x-8 gap-y-6">
-										{customerInfo.customer.idno && (
+										{customerInfo.nationalID && (
 											<div>
 												<h5 className="my-3 font-medium">الرقم القومي</h5>
 												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-													{customerInfo.customer.idno}
+													{customerInfo.nationalID}
 												</p>
 											</div>
 										)}
-										{customerInfo.customerAdditionalData.mobileNumber && (
+										{customerInfo.primaryPhone && (
 											<div>
 												<h5 className="my-3 font-medium">رقم الهاتف</h5>
 												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.customerAdditionalData.mobileNumber}
+													{customerInfo.primaryPhone}
 												</p>
 											</div>
 										)}
-										{customerInfo.customerAdditionalData.mobileNumber2 && (
+										{customerInfo.anotherPhone && (
 											<div>
 												<h5 className="my-3 font-medium"> رقم الهاتف الأخر</h5>
 												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.customerAdditionalData.mobileNumber2}
+													{customerInfo.anotherPhone}
 												</p>
 											</div>
 										)}
-										{customerInfo.customerAdditionalData.inquireAddress && (
+										{customerInfo.inquireAddress && (
 											<div>
 												<h5 className="my-3 font-medium">عنوان الإستعلام</h5>
 												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.customerAdditionalData.inquireAddress}
+													{customerInfo.inquireAddress}
 												</p>
 											</div>
 										)}
-										{customerInfo.customerAdditionalData.homeAddress && (
+										{customerInfo.homeAddress && (
 											<div>
 												<h5 className="my-3 font-medium">العنوان</h5>
 												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.customerAdditionalData.homeAddress}
+													{customerInfo.homeAddress}
 												</p>
 											</div>
 										)}
-										{customerInfo.customerAdditionalData.emailAddress && (
+										{customerInfo.email && (
 											<div>
 												<h5 className="my-3 font-medium">الايميل</h5>
 												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.customerAdditionalData.emailAddress}
+													{customerInfo.email}
 												</p>
 											</div>
 										)}
-										{customerInfo.customerAdditionalData
-											.buesinessDescription && (
+										{customerInfo.sectorName && (
+											<div>
+												<h5 className="my-3 font-medium">قطاع الوظيفة</h5>
+												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+													{customerInfo.sectorName}
+												</p>
+											</div>
+										)}
+										{customerInfo.jobName && (
 											<div>
 												<h5 className="my-3 font-medium">المسمي الوظيفي</h5>
 												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{
-														customerInfo.customerAdditionalData
-															.buesinessDescription
-													}
+													{customerInfo.jobName}
 												</p>
 											</div>
 										)}
-										{customerInfo.customerAdditionalData.monthlyIncome && (
+
+										{customerInfo.monthlyIncome && (
 											<div>
 												<h5 className="my-3 font-medium">الدخل الشهري</h5>
 												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.customerAdditionalData.monthlyIncome}
+													{customerInfo.monthlyIncome}
 												</p>
 											</div>
 										)}
@@ -187,7 +197,7 @@ const AcceptedCustomer = () => {
 									</button>
 								</Link>
 							</div>
-						</div> */}
+						</div>
 					</section>
 				</>
 			)}

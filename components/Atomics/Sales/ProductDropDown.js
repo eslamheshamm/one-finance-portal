@@ -8,7 +8,7 @@ export const ProductsDropDown = ({
 	selectedCategoryProduct = {
 		name: "يرجي الإختيار",
 		id: -1,
-		product: [],
+		productListResponseDTO: [],
 	},
 	setSelectedCategoryProduct,
 	selectedProduct = {

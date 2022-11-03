@@ -21,81 +21,106 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 		watch,
 	} = useForm({ mode: "onChange" });
 	const [userExist, setUserExist] = useState(false);
-	const [customerInfo, setCustomerData] = useState(null);
-
+	const [customerInfo, setCustomerInfo] = useState(null);
 	const [selectedCategoryProduct, setSelectedCategoryProduct] = useState({
-		categoryName: "يرجي الإختيار",
-		categoryId: -1,
-		product: [],
+		name: "يرجي الإختيار",
+		id: -1,
+		productListResponseDTO: [],
 	});
 	const [selectedProduct, setSelectedProduct] = useState({
 		name: "يرجي الإختيار",
 		id: -1,
 	});
-	const [requetedLoanDocs, setRequetedLoanDocs] = useState(null);
-	const [loadingDocs, setLoadingDocs] = useState(false);
+
+	// const [requetedLoanDocs, setRequetedLoanDocs] = useState(null);
+	// const [loadingDocs, setLoadingDocs] = useState(false);
 	const [loanInstallments, setLoanInstallments] = useState(0);
-	const handleGetRequestedLoanDocs = () => {
-		setLoadingDocs(true);
+	// const handleGetRequestedLoanDocs = () => {
+	// 	setLoadingDocs(true);
+	// 	apiClient
+	// 		.post(`/api/Loan/GetLoanRequestedDocumentTypeUpload`, {
+	// 			productId: selectedProduct.id,
+	// 		})
+	// 		.then((res) => {
+	// 			setLoadingDocs(false);
+	// 			if (res.data.isSuccess) {
+	// 				setRequetedLoanDocs(res.data.loanDownloadDocuments);
+	// 			}
+	// 		})
+	// 		.catch((err) => {
+	// 			console.log(err);
+	// 		})
+	// 		.finally(() => {
+	// 			setLoadingDocs(false);
+	// 		});
+	// };
+
+	// useEffect(() => {
+	// 	if (selectedProduct.id !== -1 && selectedProduct.id !== null) {
+	// 		handleGetRequestedLoanDocs();
+	// 	}
+	// }, [selectedProduct, setSelectedProduct]);
+
+	// const handleSeachCustomer = () => {
+	// 	const loading = toast.loading("جاري البحث عن العميل..");
+	// 	apiClient
+	// 		.post("/api/Customer/GetCustomerDetails", { customerId: customerId })
+	// 		.then(({ data }) => {
+	// 			toast.dismiss(loading);
+	// 			if (data.isSuccess) {
+	// 				toast.success("العميل موجود..");
+	// 			}
+	// 			if (data.customer) {
+	// 				const customer = data.customer;
+	// 				setValue("idno", customer.customer.idno);
+	// 				setCustomerData(data.customer);
+	// 				setUserExist(true);
+	// 			} else {
+	// 				toast.error("العميل غير موجود..");
+	// 				resetField("idno");
+	// 			}
+	// 		})
+	// 		.catch(() => {
+	// 			toast.dismiss(loading);
+	// 			toast.error("لقد حدث خطأ..");
+	// 		});
+	// };
+	// useEffect(() => {
+	// 	handleSeachCustomer();
+	// }, []);
+	const GetCustomerData = () => {
+		const loading = toast.loading("جاري تحميل بيانات العميل ..");
 		apiClient
-			.post(`/api/Loan/GetLoanRequestedDocumentTypeUpload`, {
-				productId: selectedProduct.id,
+			.get("/api/Customer/GetCustomerDetailsByID", {
+				params: {
+					CustomerID: customerId,
+				},
 			})
 			.then((res) => {
-				setLoadingDocs(false);
-				if (res.data.isSuccess) {
-					setRequetedLoanDocs(res.data.loanDownloadDocuments);
-				}
-			})
-			.catch((err) => {
-				console.log(err);
-			})
-			.finally(() => {
-				setLoadingDocs(false);
-			});
-	};
-
-	useEffect(() => {
-		if (selectedProduct.id !== -1 && selectedProduct.id !== null) {
-			handleGetRequestedLoanDocs();
-		}
-	}, [selectedProduct, setSelectedProduct]);
-
-	const handleSeachCustomer = () => {
-		const loading = toast.loading("جاري البحث عن العميل..");
-		apiClient
-			.post("/api/Customer/GetCustomerDetails", { customerId: customerId })
-			.then(({ data }) => {
 				toast.dismiss(loading);
-				if (data.isSuccess) {
-					toast.success("العميل موجود..");
-				}
-				if (data.customer) {
-					const customer = data.customer;
-					setValue("idno", customer.customer.idno);
-					setCustomerData(data.customer);
+				console.log(res.data);
+				if (res.data.isSuccess) {
+					toast.success("تم تحميل بيانات العميل.");
+					// setIsSuccess(true);
+					setCustomerInfo(res.data.data);
+					console.log(customerInfo, "hello");
+					setValue("idno", res.data.data.nationalID);
 					setUserExist(true);
-				} else {
-					toast.error("العميل غير موجود..");
-					resetField("idno");
 				}
 			})
 			.catch(() => {
 				toast.dismiss(loading);
-				toast.error("لقد حدث خطأ..");
+				// toast.error("لقد حدث خطأ.");
 			});
 	};
 	useEffect(() => {
-		handleSeachCustomer();
+		GetCustomerData();
 	}, []);
-
 	const onSubmit = (data) => {
 		const loading = toast.loading("جاري إضافة التمويل..");
 		apiClient
 			.post("/api/Loan/CreateLoan", {
-				id: 0,
-				customerId: Number(customerId),
-				sales: session.user.id,
+				customerID: Number(customerId),
 				product: selectedProduct.id,
 				amount: Number(data.LoanAmount),
 				period: Number(data.LoanDuration),
@@ -139,8 +164,9 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 			})
 			.then((res) => {
 				toast.dismiss(loading);
+				console.log(res, "fafaf");
 				if (res.data.isSuccess) {
-					setLoanInstallments(res.data.installmentAmount);
+					setLoanInstallments(res.data.data.installmentAmount);
 				}
 			})
 			.catch(() => {
@@ -186,48 +212,7 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 						disabled={userExist}
 					/>
 				</div>
-				{customerInfo && customerInfo.customerScoring && (
-					<div>
-						<h2 className="mt-12 mb-6 font-3xl font-bold ">تقييم العميل</h2>
-						{customerInfo && customerInfo.customerScoring && (
-							<div className="grid grid-cols-2 gap-x-8 gap-y-6">
-								<div>
-									<h5 className="my-3 font-medium"> شريحة العميل</h5>
-									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-										{customerInfo.customerScoring.segmentation === 1 &&
-											"Prestige"}
-										{customerInfo.customerScoring.segmentation === 2 && "Elite"}
-										{customerInfo.customerScoring.segmentation === 3 &&
-											"Select Plus"}
-										{customerInfo.customerScoring.segmentation === 4 &&
-											"Select"}
-									</p>
-								</div>
-								<div>
-									<h5 className="my-3 font-medium">شريحة التسعير</h5>
-									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-										{customerInfo.customerScoring.pricing === 1 && "A"}
-										{customerInfo.customerScoring.pricing === 2 && "B"}
-										{customerInfo.customerScoring.pricing === 3 && "C"}
-										{customerInfo.customerScoring.pricing === 4 && "D"}
-									</p>
-								</div>
-								<div>
-									<h5 className="my-3 font-medium">حد التمويل</h5>
-									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-										{customerInfo.customerScoring.exposureLimit}
-									</p>
-								</div>
-								<div>
-									<h5 className="my-3 font-medium">سعر فائدة السلعة المعمرة</h5>
-									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-										{customerInfo.customerScoring.cgfRate}
-									</p>
-								</div>
-							</div>
-						)}
-					</div>
-				)}
+
 				<div className="grid grid-cols-2 gap-6">
 					<h2 className="mt-12 mb-6 font-3xl font-bold ">بيانات التمويل</h2>
 					<ProductsDropDown
@@ -290,13 +275,13 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 						<div className={buttonClass}>{loanInstallments} </div>
 					</div>
 				</div>
-				<div>
+				{/* <div>
 					{loadingDocs && (
 						<div className="py-12 flex justify-center items-center">
 							<Loading />
 						</div>
 					)}
-					{!loadingDocs && requetedLoanDocs && (
+					{!loadingDocs && requetedLoanDocs && ( 
 						<>
 							{requetedLoanDocs && requetedLoanDocs.length >= 1 ? (
 								<div className="">
@@ -322,7 +307,7 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 							)}
 						</>
 					)}
-				</div>
+				</div> */}
 				<div className="flex items-center  justify-end">
 					<button
 						type="submit"

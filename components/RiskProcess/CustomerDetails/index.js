@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import moment from "moment";
@@ -8,6 +8,7 @@ import moment from "moment";
 import { CustomDropDown } from "../../Atomics/CustomDropDown";
 import apiClient from "../../../services/apiClient";
 import { FileUploader } from "../../Atomics/Files/FileUploader";
+import { Dialog, Transition } from "@headlessui/react";
 
 const segmentationList = [
 	{ name: "Prestige", value: 1 },
@@ -48,6 +49,7 @@ export const CustomerDetails = ({
 	});
 
 	const [pricing, setPricing] = useState({ name: "لا يوجد", value: 0 });
+	const [showError, setShowError] = useState(false);
 	const [segmentation, setSegmentation] = useState({
 		name: "لا يوجد",
 		value: 0,
@@ -101,15 +103,33 @@ export const CustomerDetails = ({
 		);
 		apiClient
 			.post("/api/Customer/ApproveCustomer", {
+				// customerID: customerInfo.customerID,
+				// comment: data.notes,
+				// isSaving: watchReasons === "save" ? true : false,
+				// calculation: {
+				// 	iScoreScore: data.iScoreScore,
+				// 	iScoreFileUrl: `"${iscoreUrl}"`,
+				// 	homeVisitFileUrl: `"${homeVisitUrl}"`,
+				// 	workVisitFileUrl: `"${workVisitUrl}"`,
+				// 	comment: data.notes,
+				// 	assumedIncome: data.assumedIncome,
+				// 	creditCard: data.creditCard,
+				// 	personalLoan: data.personalLoan,
+				// 	autoLoan: data.autoLoan,
+				// 	overDraft: data.overDraft,
+				// },
+
 				customerID: customerInfo.customerID,
 				comment: data.notes,
+				monthlyIncome: customerInfo.monthlyIncome,
+				pricingSegment: segmentation.value,
 				isSaving: watchReasons === "save" ? true : false,
 				calculation: {
 					iScoreScore: data.iScoreScore,
-					iScoreFileUrl: `"${iscoreUrl}"`,
-					homeVisitFileUrl: `"${homeVisitUrl}"`,
-					workVisitFileUrl: `"${workVisitUrl}"`,
-					comment: data.notes,
+					iScoreFileUrl: "string",
+					homeVisitFileUrl: "string",
+					workVisitFileUrl: "string",
+					comment: "string",
 					assumedIncome: data.assumedIncome,
 					creditCard: data.creditCard,
 					personalLoan: data.personalLoan,
@@ -125,6 +145,9 @@ export const CustomerDetails = ({
 							? "تم حفظ العميل بنجاح."
 							: "تم قبول العميل بنجاح."
 					);
+					if (res.data.errors.code === 62) {
+						setShowError(true);
+					}
 				}
 			})
 			.catch(() => {
@@ -132,9 +155,9 @@ export const CustomerDetails = ({
 				toast.error("لقد حدث خطأ في الأنترنت.");
 			})
 			.finally(() => {
-				setTimeout(() => {
-					router.push("/risk/customers/queue");
-				}, 1000);
+				// setTimeout(() => {
+				// 	router.push("/risk/customers/queue");
+				// }, 1000);
 			});
 	};
 	const RequestForEdit = (data) => {
@@ -201,9 +224,9 @@ export const CustomerDetails = ({
 		}
 	};
 	useEffect(() => {
-		if (customerInfo && customerInfo.customerCalculation) {
-			setValue("iScore", customerInfo.customerCalculation.iScoreScore);
-			setValue("assumedIncome", customerInfo.customerCalculation.assumedIncome);
+		if (customerInfo) {
+			// setValue("iScore", customerInfo.customerCalculation.iScoreScore);
+			// setValue("assumedIncome", customerInfo.assumedIncome);
 		}
 	}, [customerInfo]);
 	if (!customerInfo) {
@@ -274,6 +297,7 @@ export const CustomerDetails = ({
 			)}
 
 			{/* customer info  */}
+
 			{customerInfo && (
 				<div className="mb-12">
 					<h2 className="mb-6 text-2xl font-bold ">معلومات العميل </h2>
@@ -446,7 +470,7 @@ export const CustomerDetails = ({
 					</div>
 				</div>
 				 */}
-			{customerInfo.customerCalculation && (
+			{/* {customerInfo.customerCalculation && (
 				<div className="flex flex-col items-start ">
 					<div className="w-full">
 						<h2 className="mb-6 text-2xl font-bold">نتيجة التقييم</h2>
@@ -537,7 +561,7 @@ export const CustomerDetails = ({
 						</div>
 					</div>
 				</div>
-			)}
+			)} */}
 			{/* customerScoring */}
 			{/* {customerInfo && customerInfo.customerScoring && (
 				<div className="mb-12">
@@ -597,15 +621,16 @@ export const CustomerDetails = ({
 						<div className=" border-t border-b py-8">
 							<h2 className="mb-6 text-2xl font-bold ">بيانات التقييم </h2>
 							<div className="grid grid-cols-2 gap-6">
-								<div className=" w-full space-y-5">
-									<label htmlFor="iScoreScore" className="font-semibold">
-										تقييم الIscore
+								<div className=" w-full space-y-4">
+									<label htmlFor="pricing" className="font-semibold">
+										شريحة التسعير
 									</label>
-									<input
-										type="number"
-										placeholder="0"
-										{...register("iScoreScore")}
-										className={buttonClass}
+									<CustomDropDown
+										option={pricing}
+										selectOption={setPricing}
+										items={pricingList}
+										icon={Arrow}
+										className=" text-black  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
 									/>
 								</div>
 								<div className=" w-full space-y-5">
@@ -620,11 +645,23 @@ export const CustomerDetails = ({
 									/>
 								</div>
 								<div className=" w-full space-y-5">
+									<label htmlFor="iScoreScore" className="font-semibold">
+										تقييم الIscore
+									</label>
+									<input
+										type="number"
+										placeholder="0"
+										{...register("iScoreScore")}
+										className={buttonClass}
+									/>
+								</div>
+
+								<div className=" w-full space-y-5">
 									<label htmlFor="creditCard" className="font-semibold">
 										Credit Card
 									</label>
 									<input
-										type="number"
+										type="string"
 										placeholder="0"
 										{...register("creditCard")}
 										className={buttonClass}
@@ -664,7 +701,7 @@ export const CustomerDetails = ({
 									/>
 								</div>
 							</div>
-							<div className=" mt-6  ">
+							{/* <div className=" mt-6  ">
 								<h2 className=" font-bold  mb-4 text-xl">مستندات التقييم</h2>
 								<div className="flex items-center gap-8 w-full">
 									{customerInfo.customerCalculation &&
@@ -753,7 +790,7 @@ export const CustomerDetails = ({
 										/>
 									)}
 								</div>
-							</div>
+							</div> */}
 						</div>
 
 						{/* actions */}
@@ -865,10 +902,10 @@ export const CustomerDetails = ({
 						)}
 						<div className="mt-10 flex justify-end w-full">
 							<button
-								disabled={
-									watchReasons === "accept" &&
-									(segmentation.value === 0 || pricing.value === 0)
-								}
+								// disabled={
+								// 	watchReasons === "accept" &&
+								// 	(segmentation.value === 0 || pricing.value === 0)
+								// }
 								type="submit"
 								className=" font-semibold rounded-full  bg-[#343434]   text-white flex rtl:flex-row-reverse justify-center items-center  py-5  px-24  group hover:bg-[#EDAA00]  transition-all duration-200"
 							>
@@ -878,10 +915,77 @@ export const CustomerDetails = ({
 					</form>
 				</div>
 			)}
+			<MyDialog isOpen={showError} setIsOpen={setShowError} />
 		</section>
 	);
 };
+function MyDialog({ isOpen, setIsOpen }) {
+	function closeModal() {
+		setIsOpen(false);
+	}
 
+	function openModal() {
+		setIsOpen(true);
+	}
+
+	return (
+		<>
+			<Transition appear show={isOpen} as={Fragment}>
+				<Dialog as="div" className="relative z-10" onClose={closeModal}>
+					<Transition.Child
+						as={Fragment}
+						enter="ease-out duration-300"
+						enterFrom="opacity-0"
+						enterTo="opacity-100"
+						leave="ease-in duration-200"
+						leaveFrom="opacity-100"
+						leaveTo="opacity-0"
+					>
+						<div className="fixed inset-0 bg-black bg-opacity-25" />
+					</Transition.Child>
+
+					<div className="fixed inset-0 overflow-y-auto">
+						<div className="flex min-h-full items-center justify-center p-4 text-center">
+							<Transition.Child
+								as={Fragment}
+								enter="ease-out duration-300"
+								enterFrom="opacity-0 scale-95"
+								enterTo="opacity-100 scale-100"
+								leave="ease-in duration-200"
+								leaveFrom="opacity-100 scale-100"
+								leaveTo="opacity-0 scale-95"
+							>
+								<Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+									<Dialog.Title
+										as="h3"
+										className="text-lg font-medium leading-6 text-gray-900"
+									>
+										إجابات خاطئة
+									</Dialog.Title>
+									<div className="mt-2">
+										<p className="text-sm text-gray-500">
+											تقييم العميل لا يتطابق مع الإجابات المقدمة
+										</p>
+									</div>
+
+									<div className="mt-4">
+										<button
+											type="button"
+											className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+											onClick={closeModal}
+										>
+											الرجوع للخلف
+										</button>
+									</div>
+								</Dialog.Panel>
+							</Transition.Child>
+						</div>
+					</div>
+				</Dialog>
+			</Transition>
+		</>
+	);
+}
 const Person = (
 	<svg
 		width="39"
@@ -1020,7 +1124,23 @@ const FolderNameIcon = (
 		/>
 	</svg>
 );
-
+const Arrow = (
+	<svg
+		width="16"
+		height="10"
+		viewBox="0 0 16 10"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<path
+			d="M14.9263 1.36816L7.9631 8.33134L0.999928 1.36816"
+			stroke="#14142B"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		/>
+	</svg>
+);
 const ArrowIcon = (
 	<svg
 		width="24"

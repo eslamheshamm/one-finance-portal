@@ -9,22 +9,22 @@ const CityClubSalesPage = () => {
 	const { id } = router.query;
 	const customerId = id;
 
-	if (
-		status === "unauthenticated" ||
-		!session ||
-		!session.user ||
-		session.user.roleId !== 4
-	) {
-		return (
-			<DashboardLayout>
-				<div className="h-full w-10/12 mx-auto flex justify-center ">
-					<h2 className="font-bold text-3xl ">
-						ليس لك الصلاحية للدخول علي هذه الصفحة!
-					</h2>
-				</div>
-			</DashboardLayout>
-		);
-	}
+	// if (
+	// 	status === "unauthenticated" ||
+	// 	!session ||
+	// 	!session.user ||
+	// 	session.user.roleId !== 4
+	// ) {
+	// 	return (
+	// 		<DashboardLayout>
+	// 			<div className="h-full w-10/12 mx-auto flex justify-center ">
+	// 				<h2 className="font-bold text-3xl ">
+	// 					ليس لك الصلاحية للدخول علي هذه الصفحة!
+	// 				</h2>
+	// 			</div>
+	// 		</DashboardLayout>
+	// 	);
+	// }
 
 	return (
 		<DashboardLayout>

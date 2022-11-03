@@ -131,9 +131,10 @@ const AddCustomerForm = () => {
 			})
 			.then(({ data }) => {
 				toast.dismiss(loading);
-				console.log(data);
+				console.log(data, "cussss");
 				if (data.isSuccess) {
 					toast.success("تم حفظ العميل بنجاح.");
+					console.log(data.data.customerID, "iddd");
 					setCustomerId(data.data.customerID);
 				}
 			})
@@ -150,7 +151,7 @@ const AddCustomerForm = () => {
 		e.preventDefault();
 		const loading = toast.loading("جاري ارسال العميل ..");
 		apiClient
-			.post("api/Customer/SubmitCustomer", {
+			.post("/api/Customer/SubmitCustomer", {
 				customerID: customerId,
 			})
 			.then(({ data }) => {
@@ -198,10 +199,10 @@ const AddCustomerForm = () => {
 					setValue("businessAddress", customer.businessAddress);
 					setValue("businessName", customer.businessName);
 					setValue("Income", customer.monthlyIncome);
-					setGovList({
-						name: customer.govNameAR,
-						govID: customer.govID,
-					});
+					// setGovList({
+					// 	name: customer.govNameAR,
+					// 	govID: customer.govID,
+					// });
 				}
 			})
 			.catch(() => {
@@ -224,9 +225,9 @@ const AddCustomerForm = () => {
 				toast.error("لقد حدث خطأ في تحميل المستندات..");
 			});
 	};
-	// useEffect(() => {
-	// 	GetCustomerDocs();
-	// }, [customerId]);
+	useEffect(() => {
+		GetCustomerDocs();
+	}, [customerId]);
 	const nationalIdButtonClass =
 		" cursor-pointer  rounded-full font-bold   flex justify-center items-center  p-6  w-full  text-black   bg-[#EDAA00]  transition-all duration-200";
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0 ring-0 focus:ring-0 `;
@@ -575,7 +576,7 @@ const AddCustomerForm = () => {
 					onClick={(e) => handleSubmitCustomer(e)}
 				>
 					<button
-						disabled={!customerDocs}
+						disabled={!customerId}
 						className={classNames(
 							" font-semibold rounded-full bg-[#343434]   text-white flex rtl:flex-row-reverse justify-center items-center py-5 px-20 group hover:bg-[#EDAA00]  transition-all duration-200 disabled:bg-[#999999] w-full group-hover:text-[#ed0000]"
 						)}
