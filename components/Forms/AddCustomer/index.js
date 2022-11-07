@@ -232,7 +232,7 @@ const AddCustomerForm = () => {
 		" cursor-pointer  rounded-full font-bold   flex justify-center items-center  p-6  w-full  text-black   bg-[#EDAA00]  transition-all duration-200";
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0 ring-0 focus:ring-0 `;
 	return (
-		<section className="w-10/12 mx-auto ">
+		<section>
 			<Toaster position="bottom-center" />
 			<form
 				onSubmit={handleSubmit(handleSaveCustomer)}

@@ -64,7 +64,7 @@ export const DropDownSearch = ({
 								leaveTo="opacity-0"
 								afterLeave={() => setQuery("")}
 							>
-								<Combobox.Options className="  absolute w-full    p-4 rounded-3xl shadow-lg z-50 bg-white overflow-auto max-h-60  scrollbar-thin ">
+								<Combobox.Options className="  absolute w-full    p-4 rounded-3xl shadow-lg z-40 bg-white overflow-auto max-h-60  scrollbar-thin ">
 									{filterItems && filterItems.length === 0 && query !== "" ? (
 										<li className="relative cursor-default select-none py-2 px-4 text-gray-700">
 											لا يوجد شيء

@@ -8,26 +8,18 @@ export default function UserMenu() {
 	return (
 		<>
 			<Menu as="div" className="relative z-50">
-				<div>
-					<Menu.Button className="flex items-center  text-left  pt-6  rounded-2xl ">
-						<Arrow className="ml-5" />
-						<div className="">
-							<div className="flex font-bold SP">
-								<p className="ml-2">{session.user.data.name}</p>
-							</div>
-							<p className="text-[#EDAA00]">
-								{session.user.data.roleID === 4 && "Sales Team"}
-								{session.user.data.roleID === 14 && "Risk Team"}
-								{session.user.data.roleID === 17 && "Finance Team"}
-								{session.user.data.roleID === 10 && "Risk Manager"}
-							</p>
-						</div>
-						<img
-							src="https://picsum.photos/200"
-							className="w-8 h-8 rounded-full mr-5"
-						/>
-					</Menu.Button>
-				</div>
+				<Menu.Button className="flex items-center gap-6 text-right">
+					<div>
+						<p className="text-lg font-bold">{session.user.data.name}</p>
+						<p className="text-[#EDAA00]">
+							{session.user.data.roleID === 4 && "فريق المبيعات"}
+							{session.user.data.roleID === 14 && "Risk Team"}
+							{session.user.data.roleID === 17 && "Finance Team"}
+							{session.user.data.roleID === 10 && "Risk Manager"}
+						</p>
+					</div>
+					<Arrow />
+				</Menu.Button>
 				<Transition
 					as={Fragment}
 					enter="transition ease-out duration-100"
@@ -37,7 +29,7 @@ export default function UserMenu() {
 					leaveFrom="transform opacity-100 scale-100"
 					leaveTo="transform opacity-0 scale-95"
 				>
-					<Menu.Items className="absolute left-0 mt-2 w-64 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-sm  focus:outline-none">
+					<Menu.Items className="absolute left-0 mt-5 w-44 origin-top-right divide-y divide-gray-100 rounded-xl bg-white shadow-md border  focus:outline-none ">
 						<div className="py-3 px-2 ">
 							<Menu.Item>
 								{({ active }) => (

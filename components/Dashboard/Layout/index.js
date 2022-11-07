@@ -1,15 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useRef, useState } from "react";
 import classNames from "classnames";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Logo } from "../../Atomics/Logo";
 import { RiskSideBar } from "./RiskSideBar";
 import { SaleSideBar } from "./SaleSideBar";
 import { useRouter } from "next/router";
 import UserMenu from "../../Atomics/User/UserMenu";
+import Sidebar from "./SideBar";
+import { motion, useSpring } from "framer-motion";
+import { Spin as Hamburger } from "hamburger-react";
+import useOnClickOutside from "../../../hooks/useOutsideWrapper";
 
 const DashboardLayout = ({ children, lang = "ar" }) => {
 	const { data: session, status } = useSession();
 	const router = useRouter();
+	const [isOpen, setOpen] = useState(false);
+	const x = useSpring(0, { stiffness: 400, damping: 40 });
+	const sideBarRef = useRef();
+
+	useOnClickOutside(sideBarRef, () => {
+		setOpen(false);
+		!isOpen && x.set(0);
+	});
+
 	if (status === "unauthenticated") {
 		router.push("/login");
 		return (
@@ -57,37 +70,89 @@ const DashboardLayout = ({ children, lang = "ar" }) => {
 	}
 
 	return (
-		<div
+		<motion.div
 			dir={lang === "ar" ? "rtl" : "ltr"}
 			className={classNames(
-				` min-h-screen justify-between flex  relative bg-[#F8F8F8]`,
+				` min-h-screen justify-between flex flex-col  relative bg-[#F8F8F8]`,
 				lang === "ar" ? "font-Cairo" : "font-Poppins"
 			)}
+			onPan={(e, pointInfo) => {
+				if (pointInfo.point.x < 400) x.set(pointInfo.point.x - 400);
+			}}
+			onPanEnd={(e, pointInfo) => {
+				if (Math.abs(pointInfo.velocity.x) > 2000 && !isOpen) {
+					if (pointInfo.velocity.x > 0) {
+						x.set(0);
+					} else x.set(-400);
+				} else {
+					if (Math.abs(x.current) < 400 / 2) {
+						x.set(0);
+						// setOpen(true)
+					} else {
+						x.set(-400);
+						// setOpen(false)
+					}
+				}
+			}}
 		>
-			<div className=" h-screen sticky right-0 w-[20vw] pr-6 py-8">
-				<div className=" rounded-3xl shadow-md h-full bg-white">
-					<div className="w-full  p-12  h-full flex flex-col">
+			<header className=" py-8 mb-8 bg-white shadow-sm">
+				<nav className=" w-10/12 mx-auto flex justify-between">
+					<div className="flex items-center gap-6 relative ">
+						<div className=" relative">
+							<motion.button className="text-white   p-2 rounded-full bg-gray-800 z-[9999999999999] relative flex items-center justify-center h-full">
+								<Hamburger
+									onToggle={() => {
+										setOpen(!isOpen);
+										isOpen ? x.set(400) : x.set(0);
+									}}
+									toggled={isOpen}
+									size={32}
+								/>
+							</motion.button>
+						</div>
 						<Logo />
-						<div className="mt-10 h-full flex flex-col justify-between">
-							<div>
-								{session && session.user.data.roleID === 4 && <SaleSideBar />}
-								{session && session.user.data.roleID === 14 && <RiskSideBar />}
+					</div>
+					<UserMenu />
+				</nav>
+				<motion.div
+					transition={{
+						type: "spring",
+						stiffness: 400,
+						damping: 40,
+					}}
+					initial={{ x: 400 }}
+					style={{ x }}
+					className=" w-[400px] right-0 fixed  top-0 h-screen z-50"
+					dir="ltr"
+					ref={sideBarRef}
+				>
+					<div className=" h-full   z-50">
+						<div className="  shadow-md h-full w-full bg-gray-900  z-50">
+							<div className="w-full  p-12  h-full flex flex-col z-50 pt-32">
+								<div className=" h-full flex flex-col justify-between z-50">
+									<ul dir="rtl">
+										{session && session.user.data.roleID === 4 && (
+											<SaleSideBar />
+										)}
+										{session && session.user.data.roleID === 14 && (
+											<RiskSideBar />
+										)}
+									</ul>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-			<main
-				className={classNames(
-					"col-span-4 row-start-2 col-start-2 overflow-auto w-[80vw] h-screen pb-20"
-				)}
-			>
-				<div className="pt-8 pb-20 col-span-4 w-11/12 mx-auto flex justify-end">
-					<UserMenu />
-				</div>
+				</motion.div>
+			</header>
+
+			<main className={classNames(" w-10/12 mx-auto pb-20 overflow-hidden")}>
 				{children}
 			</main>
-		</div>
+		</motion.div>
 	);
 };
 export default DashboardLayout;
+
+const SideBarContainer = () => {
+	return <sidebar></sidebar>;
+};
