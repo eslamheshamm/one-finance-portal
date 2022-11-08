@@ -18,11 +18,6 @@ const DashboardLayout = ({ children, lang = "ar" }) => {
 	const x = useSpring(0, { stiffness: 400, damping: 40 });
 	const sideBarRef = useRef();
 
-	useOnClickOutside(sideBarRef, () => {
-		setOpen(false);
-		!isOpen && x.set(0);
-	});
-
 	if (status === "unauthenticated") {
 		router.push("/login");
 		return (
@@ -70,30 +65,12 @@ const DashboardLayout = ({ children, lang = "ar" }) => {
 	}
 
 	return (
-		<motion.div
+		<div
 			dir={lang === "ar" ? "rtl" : "ltr"}
 			className={classNames(
 				` min-h-screen justify-between flex flex-col  relative bg-[#F8F8F8]`,
 				lang === "ar" ? "font-Cairo" : "font-Poppins"
 			)}
-			onPan={(e, pointInfo) => {
-				if (pointInfo.point.x < 400) x.set(pointInfo.point.x - 400);
-			}}
-			onPanEnd={(e, pointInfo) => {
-				if (Math.abs(pointInfo.velocity.x) > 2000 && !isOpen) {
-					if (pointInfo.velocity.x > 0) {
-						x.set(0);
-					} else x.set(-400);
-				} else {
-					if (Math.abs(x.current) < 400 / 2) {
-						x.set(0);
-						// setOpen(true)
-					} else {
-						x.set(-400);
-						// setOpen(false)
-					}
-				}
-			}}
 		>
 			<header className=" py-8 mb-8 bg-white shadow-sm">
 				<nav className=" w-10/12 mx-auto flex justify-between">
@@ -122,37 +99,22 @@ const DashboardLayout = ({ children, lang = "ar" }) => {
 					}}
 					initial={{ x: 400 }}
 					style={{ x }}
-					className=" w-[400px] right-0 fixed  top-0 h-screen z-50"
+					className="w-[400px] right-0 fixed  top-0 h-screen z-50"
 					dir="ltr"
 					ref={sideBarRef}
 				>
-					<div className=" h-full   z-50">
-						<div className="  shadow-md h-full w-full bg-gray-900  z-50">
-							<div className="w-full  p-12  h-full flex flex-col z-50 pt-32">
-								<div className=" h-full flex flex-col justify-between z-50">
-									<ul dir="rtl">
-										{session && session.user.data.roleID === 4 && (
-											<SaleSideBar />
-										)}
-										{session && session.user.data.roleID === 14 && (
-											<RiskSideBar />
-										)}
-									</ul>
-								</div>
-							</div>
+					<div className="shadow-md h-full w-full bg-gray-900  z-50">
+						<div className="w-full h-full p-12 flex flex-col z-50 pt-32   justify-between ">
+							<ul dir="rtl">
+								{session && session.user.data.roleID === 4 && <SaleSideBar />}
+								{session && session.user.data.roleID === 14 && <RiskSideBar />}
+							</ul>
 						</div>
 					</div>
 				</motion.div>
 			</header>
-
-			<main className={classNames(" w-10/12 mx-auto pb-20 overflow-hidden")}>
-				{children}
-			</main>
-		</motion.div>
+			<main className={classNames("w-10/12 mx-auto pb-32")}>{children}</main>
+		</div>
 	);
 };
 export default DashboardLayout;
-
-const SideBarContainer = () => {
-	return <sidebar></sidebar>;
-};
