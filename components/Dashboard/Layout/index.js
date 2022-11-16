@@ -9,7 +9,7 @@ import UserMenu from "../../Atomics/User/UserMenu";
 import Sidebar from "./SideBar";
 import { motion, useSpring } from "framer-motion";
 import { Spin as Hamburger } from "hamburger-react";
-import useOnClickOutside from "../../../hooks/useOutsideWrapper";
+import useOnClickOutside from "../../../src/utils/hooks/useOutsideWrapper";
 
 const DashboardLayout = ({ children, lang = "ar" }) => {
 	const { data: session, status } = useSession();

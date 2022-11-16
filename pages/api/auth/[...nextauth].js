@@ -17,11 +17,12 @@ export default NextAuth({
 			authorize: async (credentials) => {
 				// test: http://127.0.0.1:5001/api/Identity/Login
 				// prod http://127.0.0.1:5000/api/Identity/Login
-				// new test backend  https://192.168.100.2:8001/
+				// new test backend  https://192.168.100.2:8002/
+				// new test url https://test.onefinance-eg.com:8002/
 				// new tst 127.0.0.1:5003
 				try {
 					const res = await axios.post(
-						"http://192.168.100.2:8002/api/User/UserLogin",
+						"https://test.onefinance-eg.com:8002/api/User/UserLogin",
 						{
 							userName: credentials.username,
 							password: credentials.password,

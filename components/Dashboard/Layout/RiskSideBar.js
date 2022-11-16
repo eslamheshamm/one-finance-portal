@@ -12,7 +12,7 @@ export const RiskSideBar = () => {
 							<ul className="flex flex-col space-y-4">
 								<li className="w-full text-xl">
 									<ActiveLink
-										activeClassName="text-[#EDAA00] font-semibold"
+										activeClassName=" font-semibold"
 										href="/risk/customers/queue"
 									>
 										<a className=" text-xl  text-[#999999]">الطلبات الجديدة</a>
@@ -29,10 +29,10 @@ export const RiskSideBar = () => {
 					title="التمويلات"
 					content={
 						<>
-							<ul className="flex flex-col space-y-3">
+							<ul className="flex flex-col space-y-3 text-white">
 								<li className="w-full text-xl">
 									<ActiveLink
-										activeClassName="text-black text-[#EDAA00] font-semibold"
+										activeClassName="text-black  font-semibold"
 										href="/risk/loans/queue"
 									>
 										<a className=" text-xl  text-[#999999]">الطلبات الجديدة</a>
@@ -40,7 +40,7 @@ export const RiskSideBar = () => {
 								</li>
 								<li className="w-full text-xl">
 									<ActiveLink
-										activeClassName="text-black text-[#EDAA00] font-semibold"
+										activeClassName="text-black  font-semibold"
 										href="/risk/loans/completed"
 									>
 										<a className=" text-xl  text-[#999999]">الطلبات المكتملة</a>
@@ -48,7 +48,7 @@ export const RiskSideBar = () => {
 								</li>
 								<li className="w-full text-xl">
 									<ActiveLink
-										activeClassName="text-black text-[#EDAA00] font-semibold"
+										activeClassName="text-black  font-semibold"
 										href="/risk/loans/approved"
 									>
 										<a className=" text-xl  text-[#999999]">الطلبات المقبولة</a>
@@ -56,7 +56,7 @@ export const RiskSideBar = () => {
 								</li>
 								<li className="w-full text-xl">
 									<ActiveLink
-										activeClassName="text-black text-[#EDAA00] font-semibold"
+										activeClassName="text-black  font-semibold"
 										href="/risk/loans/rejected"
 									>
 										<a className=" text-xl  text-[#999999]">الطلبات المرفوضة</a>

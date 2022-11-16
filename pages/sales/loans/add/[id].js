@@ -1,7 +1,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import DashboardLayout from "../../../components/Dashboard/Layout";
-import AddLoanDynamclyForm from "../../../components/Forms/AddLoan/Dynamicly";
+import DashboardLayout from "../../../../components/Dashboard/Layout";
+import AddLoanDynamclyForm from "../../../../components/Forms/AddLoan/Dynamicly";
 
 const CityClubSalesPage = () => {
 	const { data: session, status } = useSession();

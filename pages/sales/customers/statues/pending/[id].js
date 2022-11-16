@@ -6,10 +6,10 @@ import toast, { Toaster } from "react-hot-toast";
 import classNames from "classnames";
 import { useSession } from "next-auth/react";
 
-import DashboardLayout from "../../../../components/Dashboard/Layout";
-import apiClient from "../../../../services/apiClient";
-import { FileReplacer } from "../../../../components/Atomics/Files/FileReplacer";
-import { ProductsDropDown } from "../../../../components/Atomics/Sales/ProductDropDown";
+import DashboardLayout from "../../../../../components/Dashboard/Layout";
+import apiClient from "../../../../../services/apiClient";
+import { FileReplacer } from "../../../../../components/Atomics/Files/FileReplacer";
+import { ProductsDropDown } from "../../../../../components/Atomics/Sales/ProductDropDown";
 import moment from "moment";
 
 const PendingCustomer = () => {

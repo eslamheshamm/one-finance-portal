@@ -17,7 +17,7 @@ export const SideBarAccordion = ({ title, content, icon }) => {
 			fontWeight: "700",
 		},
 		closed: {
-			color: "#9E9E9E",
+			color: "white",
 			fontWeight: "700",
 		},
 	};
@@ -29,8 +29,8 @@ export const SideBarAccordion = ({ title, content, icon }) => {
 		},
 		closed: {
 			rotate: 0,
-			color: "white",
-			backgroundColor: "#9E9E9E",
+			color: "black",
+			backgroundColor: "white",
 		},
 	};
 	const iconVariantes = {
@@ -38,7 +38,7 @@ export const SideBarAccordion = ({ title, content, icon }) => {
 			color: "#EDAA00",
 		},
 		closed: {
-			color: "#9E9E9E",
+			color: "white",
 		},
 	};
 
