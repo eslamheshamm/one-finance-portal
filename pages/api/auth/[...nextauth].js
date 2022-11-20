@@ -22,7 +22,7 @@ export default NextAuth({
 				// new tst 127.0.0.1:5003
 				try {
 					const res = await axios.post(
-						"https://test.onefinance-eg.com:8002/api/User/UserLogin",
+						"http://test.onefinance-eg.com:8002/api/User/UserLogin",
 						{
 							userName: credentials.username,
 							password: credentials.password,

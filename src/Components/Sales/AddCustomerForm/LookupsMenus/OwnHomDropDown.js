@@ -1,8 +1,8 @@
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { Listbox } from "@headlessui/react";
-import apiClient from "../../../services/apiClient";
-import { Loading } from "../Loading";
 import { useQuery } from "@tanstack/react-query";
+import apiClient from "../../../../Utils/Services/apiClient";
+import ClipLoader from "react-spinners/ClipLoader";
 
 export const OwnHomeDropDown = ({ home, setHome }) => {
 	const { isLoading, isError, isSuccess, data } = useQuery(
@@ -16,7 +16,12 @@ export const OwnHomeDropDown = ({ home, setHome }) => {
 		<>
 			{isLoading && (
 				<div className="py-8">
-					<Loading />
+					<ClipLoader
+						color={"black"}
+						loading={isLoading}
+						size={48}
+						aria-label="Loading Spinner"
+					/>
 				</div>
 			)}
 			{isSuccess && (

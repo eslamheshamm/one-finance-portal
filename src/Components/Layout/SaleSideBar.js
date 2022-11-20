@@ -1,5 +1,5 @@
-import { SideBarAccordion } from "../../Atomics/Accordion";
-import ActiveLink from "../../Atomics/ActiveLink";
+import { SideBarAccordion } from "../Atoms/Accordion";
+import ActiveLink from "../Atoms/ActiveLink";
 
 export const SaleSideBar = () => {
 	const salesRoutes = {
@@ -9,11 +9,11 @@ export const SaleSideBar = () => {
 			routes: [
 				{
 					title: "إضافة عميل",
-					route: "/customers/add",
+					route: "/sales/customers/add",
 				},
 				{
 					title: "قائمة العملاء",
-					route: "/customers/queue",
+					route: "/sales/customers/queue",
 				},
 			],
 		},
@@ -23,15 +23,15 @@ export const SaleSideBar = () => {
 			routes: [
 				{
 					title: "الشركاء",
-					route: "/loans/add",
+					route: "/sales/loans/add",
 				},
 				{
 					title: "التمويلات المقبولة",
-					route: "/loans/approved",
+					route: "/sales/loans/approved",
 				},
 				{
 					title: "التمويلات المرفوضة",
-					route: "/loans/rejected",
+					route: "/sales/loans/rejected",
 				},
 			],
 		},
@@ -44,10 +44,16 @@ export const SaleSideBar = () => {
 					icon={CustomersIcon}
 					content={
 						<ul className="flex flex-col space-y-4 text-white">
-							<ActiveLink activeClassName="text-black" href="/customers/add">
+							<ActiveLink
+								activeClassName="text-black"
+								href="/sales/customers/add"
+							>
 								<a className=" text-xl text-[#9E9E9E]">إضافة عميل</a>
 							</ActiveLink>
-							<ActiveLink activeClassName="text-white" href="/customers/queue">
+							<ActiveLink
+								activeClassName="text-white"
+								href="/sales/customers/queue"
+							>
 								<a className=" text-xl  text-gray-400"> قائمة العملاء</a>
 							</ActiveLink>
 						</ul>
@@ -61,14 +67,17 @@ export const SaleSideBar = () => {
 					content={
 						<ul className="flex flex-col space-y-3">
 							<li>
-								<ActiveLink activeClassName=" font-semibold" href="/loans/add">
+								<ActiveLink
+									activeClassName=" font-semibold"
+									href="/sales/loans/add"
+								>
 									<a className=" text-xl ">الشركاء</a>
 								</ActiveLink>
 							</li>
 							<li>
 								<ActiveLink
 									activeClassName=" font-semibold"
-									href="/loans/approved"
+									href="/sales/loans/approved"
 								>
 									<a className=" text-xl ">التمويلات المقبولة</a>
 								</ActiveLink>
@@ -76,7 +85,7 @@ export const SaleSideBar = () => {
 							<li>
 								<ActiveLink
 									activeClassName=" font-semibold"
-									href="/loans/rejected"
+									href="/sales/loans/rejected"
 								>
 									<a className=" text-xl ">التمويلات المرفوضة</a>
 								</ActiveLink>

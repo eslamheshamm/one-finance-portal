@@ -1,5 +1,5 @@
-import { SideBarAccordion } from "../../Atomics/Accordion";
-import ActiveLink from "../../Atomics/ActiveLink";
+import { SideBarAccordion } from "../Atoms/Accordion";
+import ActiveLink from "../Atoms/ActiveLink";
 
 export const RiskSideBar = () => {
 	return (

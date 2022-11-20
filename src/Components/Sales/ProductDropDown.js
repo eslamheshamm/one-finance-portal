@@ -1,8 +1,8 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import { Listbox } from "@headlessui/react";
+import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../../services/apiClient";
 import { Loading } from "../Loading";
-import { useQuery } from "@tanstack/react-query";
 
 export const ProductsDropDown = ({
 	selectedCategoryProduct = {

@@ -33,7 +33,7 @@ export default function Home() {
 	}
 	if (status === "authenticated") {
 		if (session.user.data.roleID === 4) {
-			router.push("/customers/add");
+			router.push("/sales/customers/add");
 		} else if (session.user.data.roleID === 14) {
 			router.push("/risk/customers/queue");
 		} else if (session.user.data.roleID === 17) {

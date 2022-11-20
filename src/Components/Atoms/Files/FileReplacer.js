@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import apiClient from "../../../services/apiClient";
 import { useSession } from "next-auth/react";
+import apiClient from "../../../Utils/Services/apiClient";
 
 export const FileReplacer = ({ fileName = "", doc, EntityType, EntityID }) => {
 	const { data: session } = useSession();

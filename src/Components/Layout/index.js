@@ -1,15 +1,16 @@
 import React, { useRef, useState } from "react";
-import classNames from "classnames";
-import { useSession } from "next-auth/react";
-import { Logo } from "../../Atomics/Logo";
-import { RiskSideBar } from "./RiskSideBar";
-import { SaleSideBar } from "./SaleSideBar";
 import { useRouter } from "next/router";
-import UserMenu from "../../Atomics/User/UserMenu";
-import Sidebar from "./SideBar";
+import { useSession } from "next-auth/react";
+
+import classNames from "classnames";
+
 import { motion, useSpring } from "framer-motion";
 import { Spin as Hamburger } from "hamburger-react";
-import useOnClickOutside from "../../../src/utils/hooks/useOutsideWrapper";
+import Image from "next/image";
+
+import { RiskSideBar } from "./RiskSideBar";
+import { SaleSideBar } from "./SaleSideBar";
+import UserMenu from "./UserMenu";
 
 const DashboardLayout = ({ children, lang = "ar" }) => {
 	const { data: session, status } = useSession();
@@ -68,7 +69,7 @@ const DashboardLayout = ({ children, lang = "ar" }) => {
 		<div
 			dir={lang === "ar" ? "rtl" : "ltr"}
 			className={classNames(
-				` min-h-screen justify-between flex flex-col  relative bg-[#F8F8F8]`,
+				` min-h-screen flex flex-col  relative bg-[#F8F8F8]`,
 				lang === "ar" ? "font-Cairo" : "font-Poppins"
 			)}
 		>
@@ -87,7 +88,10 @@ const DashboardLayout = ({ children, lang = "ar" }) => {
 								/>
 							</motion.button>
 						</div>
-						<Logo />
+						<div className=" flex items-center">
+							<Image src="/logo.png" alt="One Finance" width={64} height={48} />
+							<p className="text-2xl   font-bold mr-3">وان فاينانس</p>
+						</div>{" "}
 					</div>
 					<UserMenu />
 				</nav>

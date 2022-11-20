@@ -1,11 +1,10 @@
-import { LoginForm } from "../components/Forms/Login";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import { Logo } from "../components/Atomics/Logo";
 import Image from "next/image";
 import Head from "next/head";
-import { useState } from "react";
-import { Loading } from "../components/Atomics/Loading";
+import ClipLoader from "react-spinners/ClipLoader";
+import { LoginForm } from "../src/Components/Forms/Login";
+
 const LoginPage = () => {
 	// const [isPending, startTransition] = useTransitionHook();
 	const { data: session, status } = useSession();
@@ -13,7 +12,7 @@ const LoginPage = () => {
 	if (status === "loading") {
 		return (
 			<div className="h-screen flex justify-center items-center">
-				<Loading />
+				<ClipLoader color={"#F9CD09"} size={48} aria-label="Loading Spinner" />{" "}
 			</div>
 		);
 	}
@@ -21,7 +20,7 @@ const LoginPage = () => {
 		router.push("/");
 		return (
 			<div className="h-screen flex justify-center items-center">
-				<Loading />
+				<ClipLoader color={"#F9CD09"} size={48} aria-label="Loading Spinner" />{" "}
 			</div>
 		);
 	}
@@ -42,7 +41,12 @@ const LoginPage = () => {
 				<div className="w-8/12 mx-auto my-12">
 					<div className="flex flex-col items-center mb-8 justify-center">
 						<div className="flex items-center mb-6">
-							<Image width={64} height={48} src="/logo.png" />
+							<Image
+								width={64}
+								height={48}
+								src="/logo.png"
+								alt="One Finance Logo"
+							/>
 
 							<h2 className=" text-[#EDAA00]  font-bold text-6xl  mr-3">
 								وان فاينانس <br />
@@ -65,7 +69,6 @@ const LoginPage = () => {
 			</div>
 			<div className="  pt-16  flex flex-col mt-32">
 				<div className="w-9/12 mx-auto">
-					<Logo />
 					<h2 className=" my-8     font-bold text-3xl ">
 						مرحبا بك
 						<br />

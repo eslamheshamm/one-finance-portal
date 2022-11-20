@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import ClipLoader from "react-spinners/ClipLoader";
 
-import apiClient from "../../../services/apiClient";
-import { Loading } from "../Loading";
-import { DropDownSearch } from "../../Atoms/FormInputs/DropDownSearch";
+import apiClient from "../../../../Utils/Services/apiClient";
+import { DropDownSearch } from "../../../Atoms/FormInputs/DropDownSearch";
 
 export const AddressDropDown = ({
 	govList,
@@ -19,12 +18,17 @@ export const AddressDropDown = ({
 			return await apiClient.get("/api/Lookup/GetLookupAddress");
 		}
 	);
-
+	console.log(data, "data");
 	return (
 		<div>
 			{isLoading && (
 				<div className="py-8">
-					<Loading />
+					<ClipLoader
+						color={"black"}
+						loading={isLoading}
+						size={48}
+						aria-label="Loading Spinner"
+					/>
 				</div>
 			)}
 			{isError && (
@@ -44,7 +48,7 @@ export const AddressDropDown = ({
 								cityList: e.cityList,
 							});
 						}}
-						items={data?.data?.data.governorateList}
+						items={data?.data?.data?.governorateList}
 						title="المحافظة"
 						placeholder="إختيار المحافظة"
 					/>

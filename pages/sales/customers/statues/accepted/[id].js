@@ -1,12 +1,11 @@
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import DashboardLayout from "../../../../components/Dashboard/Layout";
-import apiClient from "../../../../services/apiClient";
+import DashboardLayout from "../../../../../src/Components/Layout";
 import toast, { Toaster } from "react-hot-toast";
-import { Loading } from "../../../../components/Atomics/Loading";
 import { useQuery } from "@tanstack/react-query";
+import apiClient from "../../../../../src/Utils/Services/apiClient";
 
 const AcceptedCustomer = () => {
 	const { query, isReady } = useRouter();
@@ -14,60 +13,58 @@ const AcceptedCustomer = () => {
 	const [customerInfo, setCustomerInfo] = useState(null);
 	const [comment, setComment] = useState("");
 
-	const [isLoading, setIsLoading] = useState(true);
-	const [isSuccess, setIsSuccess] = useState(false);
-	// const { isLoading, isError, isSuccess, data } = useQuery(
-	// 	["getAcceptedCustomerDetails"],
-
-	// 	async () => {
-	// 		const res = await apiClient.get("/api/Customer/GetCustomerDetailsByID", {
-	// 			params: { CustomerID: id },
-	// 		});
-	// 		return res;
-	// 	}
-	// );
-
-	// useEffect()
-	// console.log(data?.data?.data);
-
+	// const [isLoading, setIsLoading] = useState(true);
+	// const [isSuccess, setIsSuccess] = useState(false);
+	const { isLoading, isError, isSuccess, data } = useQuery(
+		["CustomerDetailsById"],
+		async () => {
+			const res = await apiClientt.get("/api/Customer/GetCustomerDetailsByID", {
+				params: { CustomerID: id },
+			});
+			return res;
+		},
+		{
+			enabled: id !== undefined,
+		}
+	);
+	console.log(data, "user");
+	const fetchCustomerData = () => {
+		const loading = toast.loading("جاري تحميل بيانات العميل ..");
+		apiClient
+			.get("/api/Customer/GetCustomerDetailsByID", {
+				params: {
+					CustomerID: id,
+				},
+			})
+			.then((res) => {
+				toast.dismiss(loading);
+				if (res.data.isSuccess) {
+					toast.success("تم تحميل بيانات العميل.");
+					// setIsSuccess(true);
+					setCustomerInfo(res.data.data);
+				}
+				if (!res.data.isSuccess) {
+					toast.error("لقد حدث خطأ.");
+				}
+			})
+			.catch(() => {
+				toast.dismiss(loading);
+				toast.error("لقد حدث خطأ.");
+			});
+	};
 	useEffect(() => {
 		if (id) {
-			const fetchCustomerData = () => {
-				const loading = toast.loading("جاري تحميل بيانات العميل ..");
-				apiClient
-					.get("/api/Customer/GetCustomerDetailsByID", {
-						params: {
-							CustomerID: id,
-						},
-					})
-					.then((res) => {
-						toast.dismiss(loading);
-						if (res.data.isSuccess) {
-							toast.success("تم تحميل بيانات العميل.");
-							setIsSuccess(true);
-							setCustomerInfo(res.data.data);
-							console.log(res.data.data);
-						}
-						if (!res.data.isSuccess) {
-							toast.error("لقد حدث خطأ.");
-						}
-					})
-					.catch(() => {
-						toast.dismiss(loading);
-						toast.error("لقد حدث خطأ.");
-					});
-			};
 			fetchCustomerData();
 		}
 	}, [id]);
 	return (
 		<DashboardLayout>
 			<Toaster position="bottom-center" />
-			{isLoading && (
+			{/* {isLoading && (
 				<div className="py-24 flex items-center justify-center">
 					<Loading />
 				</div>
-			)}
+			)} */}
 			{isSuccess && (
 				<>
 					<section className="w-10/12 mx-auto  shadow-lg rounded-3xl bg-white">

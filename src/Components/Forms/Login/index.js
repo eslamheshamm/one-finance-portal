@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import toast, { Toaster } from "react-hot-toast";
-// import axios from "axios";
 
 export const LoginForm = () => {
 	const router = useRouter();

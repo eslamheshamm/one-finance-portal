@@ -1,6 +1,5 @@
 import axios from "axios";
 import { getSession } from "next-auth/react";
-import { settings } from "../settings";
 
 // working http
 // http://prod.onefinance-eg.com:8081/
@@ -8,7 +7,7 @@ import { settings } from "../settings";
 // https://test.onefinance-eg.com:8000
 
 // new api https://192.168.100.2:8001/
-const baseURL = ` https://test.onefinance-eg.com:8002`;
+const baseURL = ` http://192.168.100.2:8002`;
 
 const ApiClient = () => {
 	const defaultOptions = {

@@ -1,19 +1,20 @@
-import classNames from "classnames";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import classNames from "classnames";
 import toast, { Toaster } from "react-hot-toast";
-import useIdnoInfo from "../../../hooks/useIdnoInfo";
-import apiClient from "../../../services/apiClient";
-import { FileReplacer } from "../../Atomics/Files/FileReplacer";
-import { AddressDropDown } from "../../Atomics/Sales/AddressDropDown";
-import { CarsDropDown } from "../../Atomics/Sales/CarsDropDown";
-import { ClubsDropDown } from "../../Atomics/Sales/ClubsDropDown";
-import { JobDropDown } from "../../Atomics/Sales/JobDropDown";
-import { JobSectorDropDown } from "../../Atomics/Sales/JobSectorDropDown";
-import { OwnHomeDropDown } from "../../Atomics/Sales/OwnHomDropDown";
-import { OwnSecondHomeDropDown } from "../../Atomics/Sales/OwnSecondHomeDropDown";
+
+import useIdnoInfo from "../../../Utils/hooks/useIdnoInfo";
+import apiClient from "../../../Utils/Services/apiClient";
+
+import { FileReplacer } from "../../Atoms/Files/FileReplacer";
+import { AddressDropDown } from "./LookupsMenus/AddressDropDown";
+import { CarsDropDown } from "./LookupsMenus/CarsDropDown";
+import { ClubsDropDown } from "./LookupsMenus/ClubsDropDown";
+import { JobDropDown } from "./LookupsMenus/JobDropDown";
+import { JobSectorDropDown } from "./LookupsMenus/JobSectorDropDown";
+import { OwnHomeDropDown } from "./LookupsMenus/OwnHomDropDown";
+import { OwnSecondHomeDropDown } from "./LookupsMenus/OwnSecondHomeDropDown";
 
 const AddCustomerForm = () => {
 	const router = useRouter();
@@ -89,6 +90,7 @@ const AddCustomerForm = () => {
 		status: "يرجي الإختيار",
 		secondHomeID: -1,
 	});
+
 	const { dateOfBirth, gender } = useIdnoInfo(idnoWatch);
 
 	const handleSaveCustomer = (data) => {
@@ -146,7 +148,7 @@ const AddCustomerForm = () => {
 				toast.dismiss(loading);
 			});
 	};
-	// 29910012125319
+
 	const handleSubmitCustomer = (e) => {
 		e.preventDefault();
 		const loading = toast.loading("جاري ارسال العميل ..");
@@ -179,7 +181,6 @@ const AddCustomerForm = () => {
 				},
 			})
 			.then(({ data }) => {
-				console.log(data);
 				toast.dismiss(loading);
 				if (data.isSuccess) {
 					toast.success("تم العثور على العميل.");
@@ -208,26 +209,29 @@ const AddCustomerForm = () => {
 			.catch(() => {
 				toast.dismiss(loading);
 				toast.error("لقد حدث خطأ في الأنترنت.");
+			})
+			.finally(() => {
+				toast.dismiss(loading);
 			});
 	};
 
-	const GetCustomerDocs = () => {
-		apiClient
-			.post("/api/Document/GetDocument", {
-				id: "47",
-				type: 1,
-			})
-			.then((res) => {
-				console.log(res);
-				setCustomerDocs(res.data.data);
-			})
-			.catch(() => {
-				toast.error("لقد حدث خطأ في تحميل المستندات..");
-			});
-	};
-	useEffect(() => {
-		GetCustomerDocs();
-	}, [customerId]);
+	// const GetCustomerDocs = () => {
+	// 	apiClient
+	// 		.post("/api/Document/GetDocument", {
+	// 			id: "47",
+	// 			type: 1,
+	// 		})
+	// 		.then((res) => {
+	// 			console.log(res);
+	// 			setCustomerDocs(res.data.data);
+	// 		})
+	// 		.catch(() => {
+	// 			toast.error("لقد حدث خطأ في تحميل المستندات..");
+	// 		});
+	// };
+	// useEffect(() => {
+	// 	GetCustomerDocs();
+	// }, [customerId]);
 	const nationalIdButtonClass =
 		" cursor-pointer  rounded-full font-bold   flex justify-center items-center  p-6  w-full  text-black   bg-[#EDAA00]  transition-all duration-200";
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0 ring-0 focus:ring-0 `;
@@ -246,31 +250,24 @@ const AddCustomerForm = () => {
 							<label htmlFor="nationalId" className="font-semibold">
 								الرقم القومي
 							</label>
-							<div>
-								<input
-									type="number"
-									placeholder="يرجي إدخال الرقم القومي"
-									{...register("nationalId", {
-										required: true,
-										minLength: 14,
-										maxLength: 14,
-									})}
-									className={buttonClass}
-								/>
-							</div>
+							<input
+								type="number"
+								placeholder="يرجي إدخال الرقم القومي"
+								{...register("nationalId", {
+									required: true,
+									minLength: 14,
+									maxLength: 14,
+								})}
+								className={buttonClass}
+							/>
 						</div>
 						<div>
 							<div
-								className={classNames(
-									nationalIdButtonClass
-									// (Number(idnoWatch) < 14 || Number(idnoWatch) > 14) &&
-									// 	"bg-[#999999] text-[#14142B]"
-								)}
+								className={classNames(nationalIdButtonClass)}
 								onClick={(e) => {
 									e.preventDefault();
 									handlNationalIdSearch(e);
 								}}
-								// disabled={Number(idnoWatch) < 14 || Number(idnoWatch) > 14}
 							>
 								<span className="ml-4 font-bold">بحث</span>
 								{SearchIcon}

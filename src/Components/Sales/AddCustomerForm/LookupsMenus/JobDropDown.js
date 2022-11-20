@@ -1,10 +1,7 @@
-import { Fragment, useEffect, useState } from "react";
-import { Listbox } from "@headlessui/react";
-import apiClient from "../../../services/apiClient";
-import { Loading } from "../Loading";
 import { useQuery } from "@tanstack/react-query";
-import { Combobox } from "@headlessui/react";
-import { DropDownSearch } from "../../Atoms/FormInputs/DropDownSearch";
+import ClipLoader from "react-spinners/ClipLoader";
+import apiClient from "../../../../Utils/Services/apiClient";
+import { DropDownSearch } from "../../../Atoms/FormInputs/DropDownSearch";
 
 export const JobDropDown = ({ jobsList, setJobsList }) => {
 	const { isLoading, isError, isSuccess, data } = useQuery(
@@ -18,7 +15,12 @@ export const JobDropDown = ({ jobsList, setJobsList }) => {
 		<>
 			{isLoading && (
 				<div className="py-8">
-					<Loading />
+					<ClipLoader
+						color={"black"}
+						loading={isLoading}
+						size={48}
+						aria-label="Loading Spinner"
+					/>
 				</div>
 			)}
 			{isSuccess && (
