@@ -1,8 +1,8 @@
 import { Fragment } from "react";
 import { Listbox } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "../../../services/apiClient";
-import { Loading } from "../Loading";
+import apiClient from "../../Utils/Services/apiClient";
+import { ClipLoader } from "react-spinners";
 
 export const ProductsDropDown = ({
 	selectedCategoryProduct = {
@@ -40,7 +40,12 @@ export const ProductsDropDown = ({
 		<div className={className}>
 			{isLoading && (
 				<div className="py-8">
-					<Loading />
+					<ClipLoader
+						color={"#F9CD09"}
+						loading={isLoading}
+						size={48}
+						aria-label="Loading Spinner"
+					/>{" "}
 				</div>
 			)}
 			{isSuccess && (

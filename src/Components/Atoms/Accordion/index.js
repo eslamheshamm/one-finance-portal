@@ -14,11 +14,9 @@ export const SideBarAccordion = ({ title, content, icon }) => {
 	const titleVariantes = {
 		open: {
 			color: "#EDAA00",
-			fontWeight: "700",
 		},
 		closed: {
 			color: "white",
-			fontWeight: "700",
 		},
 	};
 	const arrowVarients = {
@@ -79,7 +77,7 @@ export const SideBarAccordion = ({ title, content, icon }) => {
 					variants={arrowVarients}
 					transition={{ duration: 0.4 }}
 					initial="closed"
-					className="w-6 h-6 flex items-center justify-center   text-white rounded-full"
+					className="w-6 h-6 flex items-center justify-center  rounded-full"
 				>
 					<span>{Arrow}</span>
 				</motion.button>

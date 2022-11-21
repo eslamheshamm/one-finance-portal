@@ -2,26 +2,19 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import apiClient from "../../../services/apiClient";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
-import { ProductsDropDown } from "../../Atomics/Sales/ProductDropDown";
-import { FileUploader } from "../../Atomics/Files/FileUploader";
-import { Loading } from "../../Atomics/Loading";
+import { ProductsDropDown } from "../ProductDropDown";
+// import { FileUploader } from "../../Atomics/Files/FileUploader";
 
-const AddLoanDynamclyForm = ({ customerId }) => {
+const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 	const router = useRouter();
-	const { data: session, status } = useSession();
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
-		setValue,
-		resetField,
 		watch,
 	} = useForm({ mode: "onChange" });
-	const [userExist, setUserExist] = useState(false);
-	const [customerInfo, setCustomerInfo] = useState(null);
 	const [selectedCategoryProduct, setSelectedCategoryProduct] = useState({
 		name: "يرجي الإختيار",
 		id: -1,
@@ -31,10 +24,10 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 		name: "يرجي الإختيار",
 		id: -1,
 	});
+	const [loanInstallments, setLoanInstallments] = useState(0);
 
 	// const [requetedLoanDocs, setRequetedLoanDocs] = useState(null);
 	// const [loadingDocs, setLoadingDocs] = useState(false);
-	const [loanInstallments, setLoanInstallments] = useState(0);
 	// const handleGetRequestedLoanDocs = () => {
 	// 	setLoadingDocs(true);
 	// 	apiClient
@@ -88,34 +81,6 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 	// useEffect(() => {
 	// 	handleSeachCustomer();
 	// }, []);
-	const GetCustomerData = () => {
-		const loading = toast.loading("جاري تحميل بيانات العميل ..");
-		apiClient
-			.get("/api/Customer/GetCustomerDetailsByID", {
-				params: {
-					CustomerID: customerId,
-				},
-			})
-			.then((res) => {
-				toast.dismiss(loading);
-				console.log(res.data);
-				if (res.data.isSuccess) {
-					toast.success("تم تحميل بيانات العميل.");
-					// setIsSuccess(true);
-					setCustomerInfo(res.data.data);
-					console.log(customerInfo, "hello");
-					setValue("idno", res.data.data.nationalID);
-					setUserExist(true);
-				}
-			})
-			.catch(() => {
-				toast.dismiss(loading);
-				// toast.error("لقد حدث خطأ.");
-			});
-	};
-	useEffect(() => {
-		GetCustomerData();
-	}, []);
 	const onSubmit = (data) => {
 		const loading = toast.loading("جاري إضافة التمويل..");
 		apiClient
@@ -174,10 +139,9 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 				toast.error("حدث خطأ..");
 			});
 	};
-	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full `;
-
+	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   w-full `;
 	return (
-		<section className="w-10/12 mx-auto  bg-white  rounded-3xl ">
+		<section className="  bg-white  rounded-3xl ">
 			<div>
 				<Toaster position="bottom-center" />
 			</div>
@@ -197,84 +161,115 @@ const AddLoanDynamclyForm = ({ customerId }) => {
 			</div>
 			<form
 				onSubmit={handleSubmit(onSubmit)}
-				className=" space-y-6 w-full px-12 pb-8"
+				className=" w-full px-12 pb-8"
 				autoComplete="off"
 			>
-				<div className=" w-full space-y-4">
-					<label htmlFor="idno" className="font-semibold">
-						الرقم القومي
-					</label>
-					<input
-						type="string"
-						placeholder="01146390954"
-						{...register("idno", { required: true })}
-						className={buttonClass}
-						disabled={userExist}
-					/>
+				<div className="mb-5">
+					<h2 className="mt-12 mb-6 font-3xl font-bold ">بيانات العميل</h2>
+					<div className="grid grid-cols-2 gap-6">
+						<div className=" w-full space-y-4">
+							<p className="font-semibold">اسم العميل</p>
+							<p className={buttonClass}>{`${customerInfo.firstName || ""} ${
+								customerInfo.secondName || ""
+							} ${customerInfo.middileName} ${customerInfo.lastName || ""}`}</p>
+						</div>
+						<div className=" w-full space-y-4">
+							<p className="font-semibold">حد التمويل</p>
+							<p className={buttonClass}>{customerInfo.exposureLimit}</p>
+						</div>
+						<div className=" w-full space-y-4">
+							<p className="font-semibold">حد السلعة المعمرة</p>
+							<p className={buttonClass}>{customerInfo.cgfLimit}</p>
+						</div>
+						<div className=" w-full space-y-4">
+							<p className="font-semibold">الحد الائتماني الاضافي</p>
+							<p className={buttonClass}>{customerInfo.cgfRate}</p>
+						</div>
+						<div>
+							<h5 className="my-3 font-medium">شريحة التسعير</h5>
+							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+								{customerInfo.pricing === 1 && "A"}
+								{customerInfo.pricing === 2 && "B"}
+								{customerInfo.pricing === 3 && "C"}
+								{customerInfo.pricing === 4 && "D"}
+							</p>
+						</div>{" "}
+						<div>
+							<h5 className="my-3 font-medium"> شريحة العميل</h5>
+							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+								{customerInfo.segmentation === 1 && "Prestige"}
+								{customerInfo.segmentation === 2 && "Elite"}
+								{customerInfo.segmentation === 3 && "Select Plus"}
+								{customerInfo.segmentation === 4 && "Select"}{" "}
+							</p>
+						</div>
+					</div>
+				</div>
+				<div className="mb-5 space-y-5">
+					<h2 className="font-3xl font-bold ">بيانات التمويل</h2>
+					<div className="grid grid-cols-2 gap-6">
+						<ProductsDropDown
+							selectedCategoryProduct={selectedCategoryProduct}
+							setSelectedCategoryProduct={setSelectedCategoryProduct}
+							setSelectedProduct={setSelectedProduct}
+							selectedProduct={selectedProduct}
+							className="col-span-2"
+						/>
+					</div>
+					<div className="grid grid-cols-2 gap-6">
+						<div className=" w-full space-y-4">
+							<label htmlFor="LoanAmount" className="font-semibold">
+								قيمة التمويل
+							</label>
+							<input
+								type="string"
+								placeholder="0"
+								{...register("LoanAmount", { required: true })}
+								className={buttonClass}
+							/>
+						</div>
+						<div className=" w-full space-y-4">
+							<label htmlFor="LoanDuration" className="font-semibold">
+								مدة التمويل
+							</label>
+							<input
+								type="string"
+								placeholder="0"
+								{...register("LoanDuration", { required: true })}
+								className={buttonClass}
+							/>
+						</div>
+					</div>
+					<div className="grid  gap-6 ">
+						<div className=" w-full space-y-4">
+							<label htmlFor="DownPayment" className="font-semibold">
+								الدفعة المقدمة
+							</label>
+							<input
+								type="string"
+								placeholder="0"
+								{...register("DownPayment")}
+								className={buttonClass}
+							/>
+						</div>
+						<div>
+							<button
+								className=" font-semibold rounded-full text-white py-6 bg-[#EDAA00]   w-full"
+								onClick={(e) => {
+									e.preventDefault();
+									handleCalcLoans();
+								}}
+							>
+								حساب قيمة القسط
+							</button>
+						</div>
+						<div className=" w-full space-y-4">
+							<p className="font-semibold">قيمة القسط</p>
+							<div className={buttonClass}>{loanInstallments} </div>
+						</div>
+					</div>
 				</div>
 
-				<div className="grid grid-cols-2 gap-6">
-					<h2 className="mt-12 mb-6 font-3xl font-bold ">بيانات التمويل</h2>
-					<ProductsDropDown
-						selectedCategoryProduct={selectedCategoryProduct}
-						setSelectedCategoryProduct={setSelectedCategoryProduct}
-						setSelectedProduct={setSelectedProduct}
-						selectedProduct={selectedProduct}
-						className="col-span-2"
-					/>{" "}
-				</div>
-				<div className="grid grid-cols-2 gap-6">
-					<div className=" w-full space-y-4">
-						<label htmlFor="LoanAmount" className="font-semibold">
-							قيمة التمويل
-						</label>
-						<input
-							type="string"
-							placeholder="0"
-							{...register("LoanAmount", { required: true })}
-							className={buttonClass}
-						/>
-					</div>
-					<div className=" w-full space-y-4">
-						<label htmlFor="LoanDuration" className="font-semibold">
-							مدة التمويل
-						</label>
-						<input
-							type="string"
-							placeholder="0"
-							{...register("LoanDuration", { required: true })}
-							className={buttonClass}
-						/>
-					</div>
-				</div>
-				<div className="grid  gap-6">
-					<div className=" w-full space-y-4">
-						<label htmlFor="DownPayment" className="font-semibold">
-							الدفعة المقدمة
-						</label>
-						<input
-							type="string"
-							placeholder="0"
-							{...register("DownPayment")}
-							className={buttonClass}
-						/>
-					</div>
-					<div>
-						<button
-							className=" font-semibold rounded-full    text-white flex rtl:flex-row-reverse justify-center items-center  py-5   px-20  group bg-[#EDAA00]  transition-all duration-200 w-full"
-							onClick={(e) => {
-								e.preventDefault();
-								handleCalcLoans();
-							}}
-						>
-							<span className="group-hover:text-primary">حساب قيمة القسط</span>
-						</button>
-					</div>
-					<div className=" w-full space-y-4">
-						<p className="font-semibold">قيمة القسط</p>
-						<div className={buttonClass}>{loanInstallments} </div>
-					</div>
-				</div>
 				{/* <div>
 					{loadingDocs && (
 						<div className="py-12 flex justify-center items-center">

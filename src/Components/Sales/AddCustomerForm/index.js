@@ -544,7 +544,7 @@ const AddCustomerForm = () => {
 			</form>
 
 			<div className="mt-6">
-				<div className=" mt-6 px-12 py-8 bg-white rounded-[32px] shadow-sm">
+				{/* <div className=" mt-6 px-12 py-8 bg-white rounded-[32px] shadow-sm">
 					<h2 className=" font-bold text-[#EDAA00] mb-4 text-xl">
 						مستندات العميل
 					</h2>
@@ -566,7 +566,7 @@ const AddCustomerForm = () => {
 								);
 							})}
 					</div>
-				</div>
+				</div> */}
 
 				<div
 					className="flex items-end  justify-center mt-6"

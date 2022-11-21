@@ -2,70 +2,69 @@ import { SideBarAccordion } from "../Atoms/Accordion";
 import ActiveLink from "../Atoms/ActiveLink";
 
 export const RiskSideBar = () => {
+	const riskRoutes = {
+		customer: {
+			title: "العملاء",
+			icon: CustomersIcon,
+			routes: [
+				{
+					title: "الطلبات الجديدة",
+					route: "/risk/customers/queue",
+				},
+			],
+		},
+		loan: {
+			title: "التمويلات",
+			Icon: LoansIcon,
+			routes: [
+				{
+					title: "الطلبات الجديدة",
+					route: "/risk/loans/queue",
+				},
+				{
+					title: "الطلبات المكتملة",
+					route: "/risk/loans/completed",
+				},
+				{
+					title: "الطلبات المقبولة",
+					route: "/risk/loans/approved",
+				},
+				{
+					title: "الطلبات المرفوضة",
+					route: "/risk/loans/rejected",
+				},
+			],
+		},
+	};
 	return (
-		<ul className="w-full  space-y-6 flex flex-col  mt-10 ">
-			<li className="w-full text-xl ">
-				<SideBarAccordion
-					title="العملاء"
-					content={
-						<>
-							<ul className="flex flex-col space-y-4">
-								<li className="w-full text-xl">
-									<ActiveLink
-										activeClassName=" font-semibold"
-										href="/risk/customers/queue"
-									>
-										<a className=" text-xl  text-[#999999]">الطلبات الجديدة</a>
-									</ActiveLink>
-								</li>
-							</ul>
-						</>
+		<ul className="w-full  space-y-4 flex flex-col  mt-8">
+			<li className="w-full text-xl text-white">
+				{Object.values(riskRoutes).map((tab, idx) => {
+					{
+						return (
+							<SideBarAccordion
+								key={idx}
+								title={tab.title}
+								icon={CustomersIcon}
+								content={
+									<ul className="flex flex-col gap-4">
+										{tab.routes.map((route, idx) => {
+											return (
+												<ActiveLink
+													activeClassName="text-"
+													href={route.route}
+													key={idx}
+												>
+													<a className=" text-xl ">{route.title}</a>
+												</ActiveLink>
+											);
+										})}
+									</ul>
+								}
+							/>
+						);
 					}
-				/>
-			</li>
-
-			<li className="w-full text-xl ">
-				<SideBarAccordion
-					title="التمويلات"
-					content={
-						<>
-							<ul className="flex flex-col space-y-3 text-white">
-								<li className="w-full text-xl">
-									<ActiveLink
-										activeClassName="text-black  font-semibold"
-										href="/risk/loans/queue"
-									>
-										<a className=" text-xl  text-[#999999]">الطلبات الجديدة</a>
-									</ActiveLink>
-								</li>
-								<li className="w-full text-xl">
-									<ActiveLink
-										activeClassName="text-black  font-semibold"
-										href="/risk/loans/completed"
-									>
-										<a className=" text-xl  text-[#999999]">الطلبات المكتملة</a>
-									</ActiveLink>
-								</li>
-								<li className="w-full text-xl">
-									<ActiveLink
-										activeClassName="text-black  font-semibold"
-										href="/risk/loans/approved"
-									>
-										<a className=" text-xl  text-[#999999]">الطلبات المقبولة</a>
-									</ActiveLink>
-								</li>
-								<li className="w-full text-xl">
-									<ActiveLink
-										activeClassName="text-black  font-semibold"
-										href="/risk/loans/rejected"
-									>
-										<a className=" text-xl  text-[#999999]">الطلبات المرفوضة</a>
-									</ActiveLink>
-								</li>
-							</ul>
-						</>
-					}
-				/>
+				})}
 			</li>
 		</ul>
 	);

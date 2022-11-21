@@ -1,34 +1,47 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import DashboardLayout from "../../../../components/Dashboard/Layout";
-import AddLoanDynamclyForm from "../../../../components/Forms/AddLoan/Dynamicly";
+import AddLoanDynamclyForm from "../../../../src/Components/Sales/AddLoan/Dynamicly";
+import DashboardLayout from "../../../../src/Components/Layout";
+import { ClipLoader } from "react-spinners";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "../../../../src/Utils/Services/apiClient";
 
 const CityClubSalesPage = () => {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const { id } = router.query;
-	const customerId = id;
-
-	// if (
-	// 	status === "unauthenticated" ||
-	// 	!session ||
-	// 	!session.user ||
-	// 	session.user.roleId !== 4
-	// ) {
-	// 	return (
-	// 		<DashboardLayout>
-	// 			<div className="h-full w-10/12 mx-auto flex justify-center ">
-	// 				<h2 className="font-bold text-3xl ">
-	// 					ليس لك الصلاحية للدخول علي هذه الصفحة!
-	// 				</h2>
-	// 			</div>
-	// 		</DashboardLayout>
-	// 	);
-	// }
-
+	const { isLoading, isError, isSuccess, data } = useQuery(
+		["CustomerDetailsById", id],
+		async () => {
+			const res = await apiClient.get("/api/Customer/GetCustomerDetailsByID", {
+				params: { CustomerID: id },
+			});
+			return res;
+		},
+		{
+			enabled: id !== undefined ? true : false,
+		}
+	);
 	return (
 		<DashboardLayout>
-			<AddLoanDynamclyForm customerId={customerId} />
+			{isError && (
+				<div className="h-full flex justify-center items-center py-32">
+					<h2 className="text-2xl">عذراً يوجد مشكلة في الانترنت!</h2>
+				</div>
+			)}
+			{isLoading && (
+				<div className="h-full flex justify-center items-center py-32">
+					<ClipLoader
+						color={"#F9CD09"}
+						loading={isLoading}
+						size={48}
+						aria-label="Loading Spinner"
+					/>
+				</div>
+			)}
+			{isSuccess && (
+				<AddLoanDynamclyForm customerInfo={data.data.data} customerId={id} />
+			)}
 		</DashboardLayout>
 	);
 };

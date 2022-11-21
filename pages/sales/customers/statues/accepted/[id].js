@@ -2,201 +2,207 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { ClipLoader } from "react-spinners";
+
 import DashboardLayout from "../../../../../src/Components/Layout";
-import toast, { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../../../../src/Utils/Services/apiClient";
 
 const AcceptedCustomer = () => {
-	const { query, isReady } = useRouter();
+	const { query } = useRouter();
 	const { id } = query;
-	const [customerInfo, setCustomerInfo] = useState(null);
-	const [comment, setComment] = useState("");
-
-	// const [isLoading, setIsLoading] = useState(true);
-	// const [isSuccess, setIsSuccess] = useState(false);
 	const { isLoading, isError, isSuccess, data } = useQuery(
-		["CustomerDetailsById"],
+		["CustomerDetailsById", id],
 		async () => {
-			const res = await apiClientt.get("/api/Customer/GetCustomerDetailsByID", {
+			const res = await apiClient.get("/api/Customer/GetCustomerDetailsByID", {
 				params: { CustomerID: id },
 			});
 			return res;
 		},
 		{
-			enabled: id !== undefined,
+			enabled: id !== undefined ? true : false,
 		}
 	);
-	console.log(data, "user");
-	const fetchCustomerData = () => {
-		const loading = toast.loading("جاري تحميل بيانات العميل ..");
-		apiClient
-			.get("/api/Customer/GetCustomerDetailsByID", {
-				params: {
-					CustomerID: id,
-				},
-			})
-			.then((res) => {
-				toast.dismiss(loading);
-				if (res.data.isSuccess) {
-					toast.success("تم تحميل بيانات العميل.");
-					// setIsSuccess(true);
-					setCustomerInfo(res.data.data);
-				}
-				if (!res.data.isSuccess) {
-					toast.error("لقد حدث خطأ.");
-				}
-			})
-			.catch(() => {
-				toast.dismiss(loading);
-				toast.error("لقد حدث خطأ.");
-			});
-	};
-	useEffect(() => {
-		if (id) {
-			fetchCustomerData();
-		}
-	}, [id]);
+	const buttonClass = "rounded-full px-10 p-5 bg-[#DADADA36]";
 	return (
 		<DashboardLayout>
-			<Toaster position="bottom-center" />
-			{/* {isLoading && (
-				<div className="py-24 flex items-center justify-center">
-					<Loading />
+			{isError && (
+				<div className="h-full flex justify-center items-center py-32">
+					<h2 className="text-2xl">عذراً يوجد مشكلة في الانترنت!</h2>
 				</div>
-			)} */}
+			)}
+			{isLoading && (
+				<div className="h-full flex justify-center items-center py-32">
+					<ClipLoader
+						color={"#F9CD09"}
+						loading={isLoading}
+						size={48}
+						aria-label="Loading Spinner"
+					/>
+				</div>
+			)}
 			{isSuccess && (
-				<>
-					<section className="w-10/12 mx-auto  shadow-lg rounded-3xl bg-white">
-						<div className="flex items-center justify-start pt-8 bg-[#FFC662]  rounded-3xl mb-10">
-							<Image
-								src="/customer/accepted.png"
-								alt="Almasria Logo"
-								width={245}
-								height={241}
-							/>
-							<div className="mr-4">
-								<h2 className="text-7xl mb-3">مبروك!</h2>
-								<p className="text-4xl text-white">تم قبول العميل</p>
+				<section className=" shadow-lg rounded-3xl bg-white">
+					<div className="flex items-center justify-start pt-8 bg-[#FFC662]  rounded-t-3xl">
+						<Image
+							src="/customer/accepted.png"
+							alt="Almasria Logo"
+							width={245}
+							height={241}
+						/>
+						<div className="mr-4">
+							<h2 className="text-7xl mb-3">مبروك!</h2>
+							<p className="text-4xl text-white">تم قبول العميل</p>
+						</div>
+					</div>
+					<div className={"py-8  px-12 border-gray-100 rounded-3xl bg-white"}>
+						<div className="mb-12">
+							<h2 className="mt-12 mb-6 font-3xl font-bold ">نتيجة التقييم</h2>
+							<div className="grid grid-cols-2 gap-6">
+								<div className=" w-full space-y-4">
+									<p className="font-semibold">حد التمويل</p>
+									<p className={buttonClass}>{data.data.data.exposureLimit}</p>
+								</div>
+								<div className=" w-full space-y-4">
+									<p className="font-semibold">حد السلعة المعمرة</p>
+									<p className={buttonClass}>{data.data.data.cgfLimit}</p>
+								</div>
+								<div className=" w-full space-y-4">
+									<p className="font-semibold">الحد الائتماني الاضافي</p>
+									<p className={buttonClass}>{data.data.data.cgfRate}</p>
+								</div>
+								<div>
+									<h5 className="my-3 font-medium">شريحة التسعير</h5>
+									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+										{data.data.data.pricing === 1 && "A"}
+										{data.data.data.pricing === 2 && "B"}
+										{data.data.data.pricing === 3 && "C"}
+										{data.data.data.pricing === 4 && "D"}
+									</p>
+								</div>{" "}
+								<div>
+									<h5 className="my-3 font-medium"> شريحة العميل</h5>
+									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+										{data.data.data.segmentation === 1 && "Prestige"}
+										{data.data.data.segmentation === 2 && "Elite"}
+										{data.data.data.segmentation === 3 && "Select Plus"}
+										{data.data.data.segmentation === 4 && "Select"}{" "}
+									</p>
+								</div>
 							</div>
 						</div>
-						<div className={"py-8  px-12 border-gray-100 rounded-3xl bg-white"}>
-							<div>
-								<div className="flex flex-col items-start ">
-									<h2 className="mb-6  font-bold">معلومات العميل</h2>
-									<div className="flex items-center mb-3">
-										<div className="ml-4  rounded-full  flex justify-center items-center">
-											{Person}
-										</div>
-										<p className="font-bold">{`${
-											customerInfo.firstName || ""
-										} ${customerInfo.secondName || ""} ${
-											customerInfo.middileName
-										} ${customerInfo.lastName || ""}`}</p>
-									</div>
+						<div className="flex flex-col items-start ">
+							<h2 className="mb-6  font-bold">معلومات العميل</h2>
+							<div className="flex items-center mb-3">
+								<div className="ml-4  rounded-full  flex justify-center items-center">
+									{Person}
 								</div>
-								{customerInfo && (
-									<div className="grid grid-cols-2 gap-x-8 gap-y-6">
-										{customerInfo.nationalID && (
-											<div>
-												<h5 className="my-3 font-medium">الرقم القومي</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-													{customerInfo.nationalID}
-												</p>
-											</div>
-										)}
-										{customerInfo.primaryPhone && (
-											<div>
-												<h5 className="my-3 font-medium">رقم الهاتف</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.primaryPhone}
-												</p>
-											</div>
-										)}
-										{customerInfo.anotherPhone && (
-											<div>
-												<h5 className="my-3 font-medium"> رقم الهاتف الأخر</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.anotherPhone}
-												</p>
-											</div>
-										)}
-										{customerInfo.inquireAddress && (
-											<div>
-												<h5 className="my-3 font-medium">عنوان الإستعلام</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.inquireAddress}
-												</p>
-											</div>
-										)}
-										{customerInfo.homeAddress && (
-											<div>
-												<h5 className="my-3 font-medium">العنوان</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.homeAddress}
-												</p>
-											</div>
-										)}
-										{customerInfo.email && (
-											<div>
-												<h5 className="my-3 font-medium">الايميل</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.email}
-												</p>
-											</div>
-										)}
-										{customerInfo.sectorName && (
-											<div>
-												<h5 className="my-3 font-medium">قطاع الوظيفة</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.sectorName}
-												</p>
-											</div>
-										)}
-										{customerInfo.jobName && (
-											<div>
-												<h5 className="my-3 font-medium">المسمي الوظيفي</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.jobName}
-												</p>
-											</div>
-										)}
+								<p className="font-bold">{`${data.data.data.firstName || ""} ${
+									data.data.data.secondName || ""
+								} ${data.data.data.middileName} ${
+									data.data.data.lastName || ""
+								}`}</p>
+							</div>
+						</div>
+						{data.data.data && (
+							<div className="grid grid-cols-2 gap-x-8 gap-y-6">
+								{data.data.data.nationalID && (
+									<div>
+										<h5 className="my-3 font-medium">الرقم القومي</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
+											{data.data.data.nationalID}
+										</p>
+									</div>
+								)}
+								{data.data.data.primaryPhone && (
+									<div>
+										<h5 className="my-3 font-medium">رقم الهاتف</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{data.data.data.primaryPhone}
+										</p>
+									</div>
+								)}
+								{data.data.data.anotherPhone && (
+									<div>
+										<h5 className="my-3 font-medium"> رقم الهاتف الأخر</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{data.data.data.anotherPhone}
+										</p>
+									</div>
+								)}
+								{data.data.data.inquireAddress && (
+									<div>
+										<h5 className="my-3 font-medium">عنوان الإستعلام</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{data.data.data.inquireAddress}
+										</p>
+									</div>
+								)}
+								{data.data.data.homeAddress && (
+									<div>
+										<h5 className="my-3 font-medium">العنوان</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{data.data.data.homeAddress}
+										</p>
+									</div>
+								)}
+								{data.data.data.email && (
+									<div>
+										<h5 className="my-3 font-medium">الايميل</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{data.data.data.email}
+										</p>
+									</div>
+								)}
+								{data.data.data.sectorName && (
+									<div>
+										<h5 className="my-3 font-medium">قطاع الوظيفة</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{data.data.data.sectorName}
+										</p>
+									</div>
+								)}
+								{data.data.data.jobName && (
+									<div>
+										<h5 className="my-3 font-medium">المسمي الوظيفي</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{data.data.data.jobName}
+										</p>
+									</div>
+								)}
 
-										{customerInfo.monthlyIncome && (
-											<div>
-												<h5 className="my-3 font-medium">الدخل الشهري</h5>
-												<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-													{customerInfo.monthlyIncome}
-												</p>
-											</div>
-										)}
+								{data.data.data.monthlyIncome && (
+									<div>
+										<h5 className="my-3 font-medium">الدخل الشهري</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{data.data.data.monthlyIncome}
+										</p>
 									</div>
 								)}
 							</div>
-
-							{comment && (
-								<div className=" w-full mt-12">
-									<h2 className="mb-6  font-bold">الملاحظة </h2>
-									<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-										{comment}
-									</p>
-								</div>
-							)}
-							<div className="mt-12 flex items-end justify-end">
-								<Link
-									href={{
-										pathname: "/loans/add/[id]",
-										query: { id: id },
-									}}
-								>
-									<button className="py-6 px-20 bg-[#343434] text-white font-bold rounded-full">
-										طلب تمويل
-									</button>
-								</Link>
+						)}
+						{/* {comment && (
+							<div className=" w-full mt-12">
+								<h2 className="mb-6  font-bold">الملاحظة </h2>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
+									{comment}
+								</p>
 							</div>
+						)} */}
+						<div className="mt-12 flex items-end justify-end">
+							<Link
+								href={{
+									pathname: "/sales/loans/add/[id]",
+									query: { id: id },
+								}}
+							>
+								<button className="py-6 px-20 bg-[#343434] text-white font-bold rounded-full">
+									طلب تمويل
+								</button>
+							</Link>
 						</div>
-					</section>
-				</>
+					</div>
+				</section>
 			)}
 		</DashboardLayout>
 	);

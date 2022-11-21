@@ -37,62 +37,34 @@ export const SaleSideBar = () => {
 		},
 	};
 	return (
-		<ul className="w-full  space-y-4 flex flex-col  mt-8 ">
+		<ul className="w-full  space-y-4 flex flex-col  mt-8">
 			<li className="w-full text-xl text-white">
-				<SideBarAccordion
-					title="العملاء"
-					icon={CustomersIcon}
-					content={
-						<ul className="flex flex-col space-y-4 text-white">
-							<ActiveLink
-								activeClassName="text-black"
-								href="/sales/customers/add"
-							>
-								<a className=" text-xl text-[#9E9E9E]">إضافة عميل</a>
-							</ActiveLink>
-							<ActiveLink
-								activeClassName="text-white"
-								href="/sales/customers/queue"
-							>
-								<a className=" text-xl  text-gray-400"> قائمة العملاء</a>
-							</ActiveLink>
-						</ul>
+				{Object.values(salesRoutes).map((tab, idx) => {
+					{
+						return (
+							<SideBarAccordion
+								key={idx}
+								title={tab.title}
+								icon={CustomersIcon}
+								content={
+									<ul className="flex flex-col gap-4">
+										{tab.routes.map((route, idx) => {
+											return (
+												<ActiveLink
+													activeClassName="text-"
+													href={route.route}
+													key={idx}
+												>
+													<a className=" text-xl ">{route.title}</a>
+												</ActiveLink>
+											);
+										})}
+									</ul>
+								}
+							/>
+						);
 					}
-				/>
-			</li>
-			<li className="w-full text-xl ">
-				<SideBarAccordion
-					title="التمويلات"
-					icon={LoansIcon}
-					content={
-						<ul className="flex flex-col space-y-3">
-							<li>
-								<ActiveLink
-									activeClassName=" font-semibold"
-									href="/sales/loans/add"
-								>
-									<a className=" text-xl ">الشركاء</a>
-								</ActiveLink>
-							</li>
-							<li>
-								<ActiveLink
-									activeClassName=" font-semibold"
-									href="/sales/loans/approved"
-								>
-									<a className=" text-xl ">التمويلات المقبولة</a>
-								</ActiveLink>
-							</li>
-							<li>
-								<ActiveLink
-									activeClassName=" font-semibold"
-									href="/sales/loans/rejected"
-								>
-									<a className=" text-xl ">التمويلات المرفوضة</a>
-								</ActiveLink>
-							</li>
-						</ul>
-					}
-				/>
+				})}
 			</li>
 		</ul>
 	);
