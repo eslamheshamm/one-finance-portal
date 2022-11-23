@@ -36,6 +36,12 @@ const LoginPage = () => {
 					content="تسجيل الدخول - وان فاينانس"
 					key="title"
 				/>
+				<meta
+					name="description"
+					content="One finance is a consumer finance company that introduces an
+						innovative after pay "
+				/>
+				<link rel="icon" href="/favicon.svg" />
 			</Head>
 			<div className="bg-[#151516] pt-8 relative overflow-hidden">
 				<div className="w-8/12 mx-auto my-12">

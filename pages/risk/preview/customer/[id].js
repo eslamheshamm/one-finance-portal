@@ -1,59 +1,41 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import toast, { Toaster } from "react-hot-toast";
-import { useSession } from "next-auth/react";
 import { Tab } from "@headlessui/react";
+import { ClipLoader } from "react-spinners";
 
-import apiClient from "../../../../services/apiClient";
-import DashboardLayout from "../../../../components/Dashboard/Layout";
-import { CustomerDetails } from "../../../../components/RiskProcess/CustomerDetails";
-import { TabButton } from "../../../../components/Atomics/TabButton";
-import { CustomerRequestHistoryTimeLine } from "../../../../components/Shared/CustomerRequestHistory";
+import { useQuery } from "@tanstack/react-query";
+
+// import { CustomerRequestHistoryTimeLine } from "../../../../components/Shared/CustomerRequestHistory";
+import apiClient from "../../../../src/Utils/Services/apiClient";
+import DashboardLayout from "../../../../src/Components/Layout";
+import { CustomerDetails } from "../../../../src/Components/Risk/PreviewViews/CustomerDetails";
+import { TabButton } from "../../../../src/Components/Atoms/TabButton";
 
 const RiskCustomerPreview = () => {
-	const { data: session, status } = useSession();
 	const router = useRouter();
 	const { id } = router.query;
-	const customerId = id;
 	const [selectedIndex, setSelectedIndex] = useState(0);
+
+	const { isLoading, isError, isSuccess, data } = useQuery(
+		["CustomerDetailsById", id],
+		async () => {
+			const res = await apiClient.get("/api/Customer/GetCustomerDetailsByID", {
+				params: { CustomerID: id },
+			});
+			return res;
+		},
+		{
+			enabled: id !== undefined ? true : false,
+			refetchInterval: false,
+			refetchIntervalInBackground: false,
+		}
+	);
+
 	const [customerInfo, setCustomerInfo] = useState(null);
 	const [customerDocs, setCustomerDocs] = useState(null);
 	const [requestHistory, setRequestHistory] = useState(null);
 
-	// const handleSetCustomerAsTaken = () => {
-	// 	apiClient
-	// 		.post("/api/Customer/SetCustomerOnRiskMan", {
-	// 			user: session.user.id,
-	// 			customerId: customerId,
-	// 		})
-	// 		.then((res) => {
-	// 			console.log(res);
-	// 		})
-	// 		.catch((err) => {
-	// 			console.log(err);
-	// 		});
-	// };
-
-	const GetCusomerInfo = () => {
-		const loadingCustomerInfo = toast.loading("جاري تحميل بيانات العميل");
-		apiClient
-			.get("/api/Customer/GetCustomerDetailsByID", {
-				params: { CustomerID: id },
-			})
-			.then((res) => {
-				toast.dismiss(loadingCustomerInfo);
-				if (res.data.isSuccess) {
-					setCustomerInfo(res.data.data);
-					console.log(res.data.data);
-					toast.success("تم تحميل بيانات العميل بنجاح");
-				}
-			})
-			.catch(() => {
-				toast.dismiss(loadingCustomerInfo);
-				toast.error("لقد حدث خطأ في الأنترنت.");
-			});
-	};
 	// const GetCustomerDocs = () => {
 	// 	apiClient
 	// 		.get("/api/Document/GetDocument", {
@@ -84,52 +66,73 @@ const RiskCustomerPreview = () => {
 	// 		});
 	// };
 
-	useEffect(() => {
-		if (customerId) {
-			GetCusomerInfo();
-			// GetCustomerDocs();
-			// GetCusomerRequestHistory();
-		}
-	}, [customerId]);
+	// useEffect(() => {
+	// 	if (customerId) {
+	// 		GetCusomerInfo();
+	// 		// GetCustomerDocs();
+	// 		// GetCusomerRequestHistory();
+	// 	}
+	// }, [customerId]);
 
 	return (
 		<DashboardLayout>
-			<Toaster position="bottom-center" />
-			<div className="w-11/12 mx-auto bg-white rounded-3xl pb-8">
-				<div className="flex items-center justify-start  pt-8 px-3 pb-0 bg-[#151516]  rounded-[36px] mb-10">
-					<Image src="/Wave.png" alt="Almasria Logo" width={212} height={212} />
-					<div className="mr-4">
-						<h2 className="text-7xl mb-3 text-[#FFC662]">مرحباً </h2>
-						<p className="text-4xl text-white">يرجي فحص بيانات العميل..</p>
-					</div>
+			{isError && (
+				<div className="h-full flex justify-center items-center py-32">
+					<h2 className="text-2xl">عذراً يوجد مشكلة في الانترنت!</h2>
 				</div>
-				<Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
-					<Tab.List>
-						<TabButton>بيانات العميل</TabButton>
-						<TabButton>بيانات التمويل</TabButton>
-						<TabButton>مستندات التمويل</TabButton>
-						<TabButton>تاريخ الطلب</TabButton>
-					</Tab.List>
-					<Tab.Panels>
-						<Tab.Panel className="mt-20">
-							<CustomerDetails
-								customerInfo={customerInfo}
-								customerDocs={customerDocs}
-								// customerId={customerId}
-							/>
-						</Tab.Panel>
-						<Tab.Panel>
-							<NoData />
-						</Tab.Panel>
-						<Tab.Panel>
-							<NoData />
-						</Tab.Panel>
-						<Tab.Panel>
-							<CustomerRequestHistoryTimeLine timeline={requestHistory} />
-						</Tab.Panel>
-					</Tab.Panels>
-				</Tab.Group>
-			</div>
+			)}
+			{isLoading && (
+				<div className="h-full flex justify-center items-center py-32">
+					<ClipLoader
+						color={"#F9CD09"}
+						loading={isLoading}
+						size={48}
+						aria-label="Loading Spinner"
+					/>
+				</div>
+			)}
+			{isSuccess && (
+				<div className=" mx-auto bg-white rounded-3xl pb-8">
+					<div className="flex items-center justify-start  pt-8 px-3 pb-0 bg-[#151516]  rounded-[36px] mb-10">
+						<Image
+							src="/Wave.png"
+							alt="Almasria Logo"
+							width={212}
+							height={212}
+						/>
+						<div className="mr-4">
+							<h2 className="text-7xl mb-3 text-[#FFC662]">مرحباً </h2>
+							<p className="text-4xl text-white">يرجي فحص بيانات العميل..</p>
+						</div>
+					</div>
+					<Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
+						<Tab.List>
+							<TabButton>بيانات العميل</TabButton>
+							<TabButton>بيانات التمويل</TabButton>
+							<TabButton>مستندات التمويل</TabButton>
+							<TabButton>تاريخ الطلب</TabButton>
+						</Tab.List>
+						<Tab.Panels>
+							<Tab.Panel className="mt-20">
+								<CustomerDetails
+									customerInfo={data.data.data}
+									// customerDocs={customerDocs}
+									// customerId={customerId}
+								/>
+							</Tab.Panel>
+							<Tab.Panel>
+								<NoData />
+							</Tab.Panel>
+							<Tab.Panel>
+								<NoData />
+							</Tab.Panel>
+							<Tab.Panel>
+								{/* <CustomerRequestHistoryTimeLine timeline={requestHistory} /> */}
+							</Tab.Panel>
+						</Tab.Panels>
+					</Tab.Group>
+				</div>
+			)}
 		</DashboardLayout>
 	);
 };

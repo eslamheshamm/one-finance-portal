@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ClipLoader } from "react-spinners";
 
-import DashboardLayout from "../../../../../src/Components/Layout";
+import { ClipLoader } from "react-spinners";
 import { useQuery } from "@tanstack/react-query";
+import DashboardLayout from "../../../../../src/Components/Layout";
 import apiClient from "../../../../../src/Utils/Services/apiClient";
 
 const AcceptedCustomer = () => {
@@ -21,6 +20,8 @@ const AcceptedCustomer = () => {
 		},
 		{
 			enabled: id !== undefined ? true : false,
+			refetchInterval: false,
+			refetchIntervalInBackground: false,
 		}
 	);
 	const buttonClass = "rounded-full px-10 p-5 bg-[#DADADA36]";

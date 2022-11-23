@@ -2,67 +2,41 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import classNames from "classnames";
 import Link from "next/link";
-import toast, { Toaster } from "react-hot-toast";
 import "moment/locale/ar";
 import moment from "moment";
 
-import ActiveLink from "../../components/Atomics/ActiveLink";
-import DashboardLayout from "../../components/Dashboard/Layout";
-import apiClient from "../../services/apiClient";
+import { useQuery } from "@tanstack/react-query";
+import ClipLoader from "react-spinners/ClipLoader";
+import DashboardLayout from "../../../src/Components/Layout";
+import apiClient from "../../../src/Utils/Services/apiClient";
 
-const CityClubLoansPage = () => {
+const PendingLoansPage = () => {
 	const { data: session, status } = useSession();
-	const [customersData, setCustomersData] = useState(null);
-
-	const fetchData = () => {
-		const loading = toast.loading("جاري تحميل البيانات..");
-		apiClient
-			.post("api/Loan/GetPendingLoans")
-			.then(({ data }) => {
-				toast.dismiss(loading);
-				if (data.isSuccess) {
-					toast.success("تم تحميل البيانات..");
-					setCustomersData(data.pendingLoans);
-				}
-			})
-			.catch(() => {
-				toast.dismiss(loading);
-				toast.error("لقد حدث خطأ..");
-			});
-	};
-	useEffect(() => {
-		fetchData();
-	}, []);
+	const { isLoading, isError, isSuccess, data } = useQuery(
+		["pendingLoansQueue"],
+		async () => {
+			return await apiClient.get("/api/Loan/GetPendingLoans");
+		}
+	);
 
 	return (
 		<DashboardLayout lang={"ar"}>
-			<section className="w-10/12 mx-auto flex justify-center mb-10">
-				<div>
-					<Toaster position="bottom-center" />
+			{isError && (
+				<div className="h-full flex justify-center items-center py-32">
+					<h2 className="text-2xl">عذراً يوجد مشكلة في الانترنت!</h2>
 				</div>
-				<div className=" rounded-full shadow-lg flex bg-white">
-					<ActiveLink
-						activeClassName="bg-[#EDAA00] text-white"
-						className=" rounded-full bg-white"
-						href="/loans/add"
-					>
-						<a className="py-5 px-36 rounded-full text-xl  bg-white">
-							إضافة تمويل
-						</a>
-					</ActiveLink>
-					<ActiveLink
-						activeClassName=" bg-[#EDAA00] text-white"
-						className=" rounded-full bg-white"
-						href="/loans/queue"
-					>
-						<a className="py-5 px-36 rounded-full text-xl bg-white">
-							جدول التمويلات
-						</a>
-					</ActiveLink>
+			)}
+			{isLoading && (
+				<div className="h-full flex justify-center items-center py-32">
+					<ClipLoader
+						color={"#F9CD09"}
+						loading={isLoading}
+						size={48}
+						aria-label="Loading Spinner"
+					/>
 				</div>
-			</section>
-
-			{customersData && (
+			)}
+			{isSuccess && (
 				<section>
 					<div className="my-12  mx-auto w-11/12 ">
 						<div className="overflow-x-auto rounded-3xl  shadow-lg" dir="rtl">
@@ -87,8 +61,8 @@ const CityClubLoansPage = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{customersData &&
-										customersData.map((item, index) => {
+									{data?.data?.data &&
+										data?.data?.data.map((item, index) => {
 											return <LoanRequestPreview key={index++} {...item} />;
 										})}
 								</tbody>
@@ -100,7 +74,7 @@ const CityClubLoansPage = () => {
 		</DashboardLayout>
 	);
 };
-export default CityClubLoansPage;
+export default PendingLoansPage;
 
 const LoanRequestPreview = ({
 	customer,

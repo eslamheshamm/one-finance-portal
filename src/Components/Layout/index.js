@@ -12,8 +12,9 @@ import Image from "next/image";
 import { RiskSideBar } from "./RiskSideBar";
 import { SaleSideBar } from "./SaleSideBar";
 import UserMenu from "./UserMenu";
+import Head from "next/head";
 
-const DashboardLayout = ({ children, lang = "ar" }) => {
+const DashboardLayout = ({ title, children, lang = "ar" }) => {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const [isOpen, setOpen] = useState(false);
@@ -44,6 +45,16 @@ const DashboardLayout = ({ children, lang = "ar" }) => {
 				lang === "ar" ? "font-Cairo" : "font-Poppins"
 			)}
 		>
+			<Head>
+				<title>{title} - وان فينانس</title>
+				<meta
+					name="description"
+					content="One finance is a consumer finance company that introduces an
+						innovative after pay "
+				/>
+				<link rel="icon" href="/favicon.svg" />
+			</Head>
+
 			<header className=" py-8 mb-8 bg-white shadow-sm">
 				<nav className=" w-10/12 mx-auto flex justify-between">
 					<div className="flex items-center gap-6 relative ">

@@ -22,8 +22,12 @@ export const SaleSideBar = () => {
 			Icon: LoansIcon,
 			routes: [
 				{
-					title: "الشركاء",
+					title: "إضافة تمويل",
 					route: "/sales/loans/add",
+				},
+				{
+					title: "قائمة التمويلات",
+					route: "/sales/loans/queue",
 				},
 				{
 					title: "التمويلات المقبولة",

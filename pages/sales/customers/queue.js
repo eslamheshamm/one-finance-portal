@@ -1,14 +1,13 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import Link from "next/link";
 import classNames from "classnames";
-import toast, { Toaster } from "react-hot-toast";
 import { Transition, Listbox } from "@headlessui/react";
 import "moment/locale/ar";
 import moment from "moment";
+import { useQuery } from "@tanstack/react-query";
+import ClipLoader from "react-spinners/ClipLoader";
 import DashboardLayout from "../../../src/Components/Layout";
 import apiClient from "../../../src/Utils/Services/apiClient";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import ClipLoader from "react-spinners/ClipLoader";
 
 const filters = [
 	{ id: 1, name: "الكل", value: "All" },
@@ -184,12 +183,13 @@ const CustomerRequestReview = ({
 		<tr className="bg-white text-[#6E7191] ">
 			<td className="  px-6 py-2 ">
 				<div className="flex items-center">
-					{/* <div className="ml-4">{Person}</div> */}
 					<p>{customerName}</p>
 				</div>
 			</td>
 			<td className="px-6 py-2">
-				<div className="flex items-center">{nationalID}</div>
+				<div className="flex items-center">
+					<p>{nationalID}</p>
+				</div>
 			</td>
 
 			<td className="px-6 py-2">

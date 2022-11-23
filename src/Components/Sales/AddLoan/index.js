@@ -3,11 +3,11 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import apiClient from "../../../services/apiClient";
 import toast, { Toaster } from "react-hot-toast";
-import { ProductsDropDown } from "../../Atomics/Sales/ProductDropDown";
-import { FileUploader } from "../../Atomics/Files/FileUploader";
-import { Loading } from "../../Atomics/Loading";
+import { ProductsDropDown } from "../ProductDropDown";
+
+// import { FileUploader } from "../../Atomics/Files/FileUploader";
+// import { Loading } from "../../Atomics/Loading";
 
 const AddLoanForm = () => {
 	const {
@@ -329,7 +329,7 @@ const AddLoanForm = () => {
 						<div className={buttonClass}>{loanInstallments} </div>
 					</div>
 				</div>
-				<div>
+				{/* <div>
 					{loadingDocs && (
 						<div className="py-12 flex justify-center items-center">
 							<Loading />
@@ -361,7 +361,7 @@ const AddLoanForm = () => {
 							)}
 						</>
 					)}
-				</div>
+				</div> */}
 				<div className="flex items-center  justify-end">
 					<button
 						type="submit"

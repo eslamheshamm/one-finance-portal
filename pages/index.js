@@ -1,4 +1,5 @@
 import { useSession } from "next-auth/react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import ClipLoader from "react-spinners/ClipLoader";
 
@@ -45,6 +46,20 @@ export default function Home() {
 
 	return (
 		<div className="min-h-screen flex justify-center items-center ">
+			<Head>
+				<title>تسجيل الدخول - وان فاينانس</title>
+				<meta
+					property="og:title"
+					content="تسجيل الدخول - وان فاينانس"
+					key="title"
+				/>
+				<meta
+					name="description"
+					content="One finance is a consumer finance company that introduces an
+						innovative after pay "
+				/>
+				<link rel="icon" href="/favicon.svg" />
+			</Head>
 			<ClipLoader color={"#F9CD09"} size={48} aria-label="Loading Spinner" />
 		</div>
 	);

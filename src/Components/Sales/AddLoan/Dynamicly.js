@@ -1,10 +1,11 @@
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
 import { ProductsDropDown } from "../ProductDropDown";
+import apiClient from "../../../Utils/Services/apiClient";
+import Modal from "../../Atoms/Modal";
 // import { FileUploader } from "../../Atomics/Files/FileUploader";
 
 const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
@@ -25,7 +26,11 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 		id: -1,
 	});
 	const [loanInstallments, setLoanInstallments] = useState(0);
-
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [modalBody, setModalBody] = useState({
+		title: "",
+		text: "",
+	});
 	// const [requetedLoanDocs, setRequetedLoanDocs] = useState(null);
 	// const [loadingDocs, setLoadingDocs] = useState(false);
 	// const handleGetRequestedLoanDocs = () => {
@@ -93,21 +98,15 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 			})
 			.then((res) => {
 				toast.dismiss(loading);
-				if (res.data.code == 602) {
-					toast.error("العميل يمتلك تمويل بالفعل..");
-					setTimeout(() => {
-						router.push("/loans/queue");
-					}, 1000);
-					return true;
-				}
+				setIsModalOpen(true);
+				setModalBody({
+					title: "لقد حدث خطأ!",
+					text: "لقد تخطي العميل الحد الأقصى للتمويل, يرجي تعديل قيمة التمويل",
+					type: "error",
+				});
+
 				if (res.data.isSuccess) {
 					toast.success("تم إضافة التمويل..");
-					setTimeout(() => {
-						router.push("/loans/queue");
-					}, 1000);
-				}
-				if (!res.data.isSuccess) {
-					toast.error("لقد حدث خطأ..");
 				}
 			});
 	};
@@ -142,6 +141,18 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   w-full `;
 	return (
 		<section className="  bg-white  rounded-3xl ">
+			<Modal
+				isOpen={isModalOpen}
+				setIsOpen={setIsModalOpen}
+				title={modalBody.title}
+				text={modalBody.text}
+				type={modalBody.type}
+				onAccept={() => {
+					setIsModalOpen(false);
+				}}
+				discardBtntext="إلغاء"
+				acceptBtnText="تأكيد"
+			/>
 			<div>
 				<Toaster position="bottom-center" />
 			</div>
