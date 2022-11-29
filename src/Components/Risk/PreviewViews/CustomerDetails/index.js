@@ -6,6 +6,7 @@ import moment from "moment";
 
 import { CustomDropDown } from "../../../Atomics/CustomDropDown";
 import apiClient from "../../../../Utils/Services/apiClient";
+import Modal from "../../../Atoms/Modal";
 // import { FileUploader } from "../../Atomics/Files/FileUploader";
 
 moment.locale("en");
@@ -63,47 +64,48 @@ export const CustomerDetails = ({
 		handleSubmit,
 		formState: { errors },
 		watch,
-		setValue,
 	} = useForm({
-		defaultValues: {
-			exposureLimit: null,
-			cgfLimit: null,
-			cgfRate: null,
-			dpr: null,
-			dprAmount: null,
-			iScore: null,
-			assumedIncome: null,
-		},
+		defaultValues: {},
 	});
-
+	const [scoringResult, setScoringResult] = useState(null);
+	const [calcScore, setCalcScore] = useState(false);
 	const [pricing, setPricing] = useState({ name: "لا يوجد", value: 0 });
 	//  refuse reasons
-	const [reasons, setReasons] = useState(refuseReasons);
 	const [refuseReason, setRefuseReason] = useState({
 		id: 300,
 		name: "الاستعلام الإئتماني غير مرضي",
+	});
+
+	const [modalBody, setModalBody] = useState({
+		title: "",
+		text: "",
+		isOpen: false,
+		onAccept: () => {},
+		onClose: () => {},
 	});
 
 	// watch statue
 	const watchReasons = watch("statue");
 
 	const AcceptOrSaveCustomer = (data) => {
+		console.log(data);
 		const loading = toast.loading(
 			watchReasons === "save" ? "جاري حفظ العميل.." : "جاري قبول العميل.."
 		);
+
 		apiClient
 			.post("/api/Customer/ApproveCustomer", {
 				customerID: customerInfo.customerID,
 				comment: data.notes,
 				monthlyIncome: customerInfo.monthlyIncome,
 				pricingSegment: pricing.value,
-				isSaving: watchReasons === "save" ? true : false,
+				isSaving: calcScore ? true : false,
 				calculation: {
-					iScoreScore: data.iScoreScore,
-					iScoreFileUrl: "string",
-					homeVisitFileUrl: "string",
-					workVisitFileUrl: "string",
-					comment: "string",
+					iScoreScore: data.Iscore,
+					iScoreFileUrl: "",
+					homeVisitFileUrl: "",
+					workVisitFileUrl: "",
+					comment: "",
 					assumedIncome: data.assumedIncome,
 					creditCard: data.creditCard,
 					personalLoan: data.personalLoan,
@@ -113,17 +115,42 @@ export const CustomerDetails = ({
 			})
 			.then((res) => {
 				toast.dismiss(loading);
-				if (res.data.isSuccess) {
-					toast.success(
-						watchReasons === "save"
-							? "تم حفظ العميل بنجاح."
-							: "تم قبول العميل بنجاح."
-					);
+				console.log(res.data);
+				setScoringResult(res.data.data);
+				if (res.data.errors.code == 39) {
+					setModalBody({
+						title: "حالة خاطئة!",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
 				}
+				// if (res.data.isSuccess) {
+				// 	toast.success(
+				// 		watchReasons === "save"
+				// 			? "تم حفظ العميل بنجاح."
+				// 			: "تم قبول العميل بنجاح."
+				// 	);
+				// }
 			})
-			.catch(() => {
-				toast.dismiss(loading);
-				toast.error("لقد حدث خطأ في الأنترنت.");
+			.catch((res) => {
+				console.log(res);
+				// if (res.status === 400) {
+				// 	console.log("hello");
+				// 	setModalBody({
+				// 		title: "لقد حدث خطأ!",
+				// 		text: "لقد تخطي العميل الحد الأقصى للتمويل, يرجي تعديل قيمة التمويل",
+				// 		type: "error",
+				// 		isOpen: true,
+				// 		onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+				// 		onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+				// 	});
+				// }
+				// toast.dismiss(loading);
+				// toast.error("لقد حدث خطأ في الأنترنت.");
 			})
 			.finally(() => {
 				// setTimeout(() => {
@@ -202,51 +229,306 @@ export const CustomerDetails = ({
 	}, [customerInfo]);
 
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:ring-0 focus:border-0 focus:outline-[#EDAA00] block w-full border-0`;
+	return (
+		<section className="w-full px-12">
+			<Toaster position="bottom-center" />
+			<Modal
+				isOpen={modalBody.isOpen}
+				onClose={modalBody.onClose}
+				title={modalBody.title}
+				text={modalBody.text}
+				type={modalBody.type}
+				onAccept={modalBody.onAccept}
+				discardBtntext="إلغاء"
+				acceptBtnText="تأكيد"
+			/>
+			<CustomerInfo customerInfo={customerInfo} />
 
+			{disableAction ? null : (
+				<form onSubmit={handleSubmit(onSubmit)} className="space-y-6 ">
+					{/* customer rate */}
+					<div className=" border-t border-b py-8">
+						<h2 className="mb-6 text-2xl font-bold ">بيانات التقييم </h2>
+						<div className="grid grid-cols-4 gap-6">
+							<div className=" w-full space-y-5">
+								<label htmlFor="Iscore" className="font-semibold">
+									تقييم الIscore
+								</label>
+								<input
+									type="number"
+									placeholder="0"
+									{...register("iScore")}
+									className={buttonClass}
+								/>
+							</div>
+
+							<div className=" w-full space-y-5">
+								<label htmlFor="creditCard" className="font-semibold">
+									Credit Card
+								</label>
+								<input
+									type="string"
+									placeholder="0"
+									{...register("creditCard")}
+									className={buttonClass}
+								/>
+							</div>
+							<div className=" w-full space-y-5">
+								<label htmlFor="personalLoan" className="font-semibold">
+									Personal Loan
+								</label>
+								<input
+									type="number"
+									placeholder="0"
+									{...register("personalLoan")}
+									className={buttonClass}
+								/>
+							</div>
+							<div className=" w-full space-y-5">
+								<label htmlFor="autoLoan" className="font-semibold">
+									Auto Loan
+								</label>
+								<input
+									type="number"
+									placeholder="0"
+									{...register("autoLoan")}
+									className={buttonClass}
+								/>
+							</div>
+							<div className=" w-full space-y-5">
+								<label htmlFor="overDraft" className="font-semibold">
+									Over Draft
+								</label>
+								<input
+									type="number"
+									placeholder="0"
+									{...register("overDraft")}
+									className={buttonClass}
+								/>
+							</div>
+							<div className=" w-full space-y-4">
+								<label htmlFor="pricing" className="font-semibold">
+									شريحة التسعير
+								</label>
+								<CustomDropDown
+									option={pricing}
+									selectOption={setPricing}
+									items={pricingList}
+									icon={Arrow}
+									className=" text-black  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
+								/>
+							</div>
+							<div className=" w-full space-y-5">
+								<label htmlFor="assumedIncome" className="font-semibold">
+									دخل العميل الفعلي
+								</label>
+								<input
+									type="number"
+									placeholder="0"
+									{...register("assumedIncome")}
+									className={buttonClass}
+								/>
+							</div>
+
+							<div className=" flex justify-end items-end">
+								<button
+									onClick={(e) => {
+										e.preventDefault();
+										setCalcScore(true);
+									}}
+									className="font-semibold rounded-full py-6  w-full bg-[#343434] text-white   hover:bg-[#EDAA00]  transition-all duration-200"
+								>
+									<span>حساب التقييم</span>
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<div></div>
+
+					{/* {
+    "segmentation": 1,
+    "pricing": 2,
+    "dpr": 50,
+    "dbr_amount": 2727,
+    "availableDBR": -58589
+    "exposure_limit": -3515340,
+    "cgf_limit": -351534,
+    "cgf_rate": -3163806,
+} */}
+					{scoringResult && (
+						<div className="flex flex-col items-start py-10 border-b mb-10">
+							<div className="w-full">
+								<h2 className="mb-6 text-2xl font-bold">نتيجة التقييم</h2>
+								<div className="grid grid-cols-4 gap-x-8 gap-y-6  ">
+									<div>
+										<h5 className="my-3 font-medium">شريحة التسعير</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{scoringResult.pricing === 1 && "A"}
+											{scoringResult.pricing === 2 && "B"}
+											{scoringResult.pricing === 3 && "C"}
+											{scoringResult.pricing === 4 && "D"}
+										</p>
+									</div>{" "}
+									<div>
+										<h5 className="my-3 font-medium"> شريحة العميل</h5>
+										<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+											{scoringResult.segmentation === 1 && "Prestige"}
+											{scoringResult.segmentation === 2 && "Elite"}
+											{scoringResult.segmentation === 3 && "Select Plus"}
+											{scoringResult.segmentation === 4 && "Select"}{" "}
+										</p>
+									</div>
+									<div className=" w-full">
+										<p className="my-3 ">حد التمويل</p>
+										<p className=" rounded-full px-10 p-6  bg-[#DADADA36]    ">
+											{scoringResult.exposure_limit}
+										</p>
+									</div>
+									<div className=" w-full">
+										<p className="my-3 ">cgf_limit</p>
+										<p className=" rounded-full px-10 p-6  bg-[#DADADA36]    ">
+											{scoringResult.cgf_limit}
+										</p>
+									</div>
+									<div className=" w-full">
+										<p className="my-3 ">عبء الدين الشهري (نسبة)</p>
+										<p className=" rounded-full px-10 p-6  bg-[#DADADA36]    ">
+											<span>{scoringResult.dpr}</span>
+											<span>%</span>
+										</p>
+									</div>
+									<div className=" w-full">
+										<p className="my-3 ">عبء الدين الشهري (قيمة)</p>
+										<p className=" rounded-full px-10 p-6  bg-[#DADADA36]    ">
+											{scoringResult.dbr_amount}
+										</p>
+									</div>
+									<div className=" w-full">
+										<p className="my-3 "> عبء الدين الشهري المتاح (قيمة)</p>
+										<p className=" rounded-full px-10 p-6 bg-[#DADADA36]">
+											{scoringResult.availableDBR}
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					)}
+
+					{/* actions */}
+					<div className="w-full space-y-5">
+						<h5 className="font-bold text-2xl ">ملاحظة</h5>
+						<div className="h-32">
+							<textarea
+								{...register("notes", {
+									required: watchReasons === "requestForEdit" ? true : false,
+								})}
+								className="resize-none p-6  w-full rounded-3xl h-full bg-[#9797971A] border-0 focus:outline-none"
+							/>
+						</div>
+					</div>
+					<div
+						className="mt-8
+					"
+					>
+						<ul className="flex items-center px-6 py-4 bg-[#DADADA36] rounded-full space-x-4">
+							<li className="relative ml-4"></li>
+							<li className="relative  ">
+								<input
+									className="sr-only peer"
+									type="radio"
+									value="accept"
+									{...register("statue", { required: true })}
+									id="accept"
+								/>
+								<label
+									className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00] peer-checked:ring-red-500 peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
+									htmlFor="accept"
+								>
+									قبول
+								</label>
+							</li>
+
+							<li className="relative ">
+								<input
+									className="sr-only peer"
+									type="radio"
+									value="requestForEdit"
+									{...register("statue", { required: true })}
+									id="edit"
+								/>
+								<label
+									className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00] peer-checked:ring-red-500 peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
+									htmlFor="edit"
+								>
+									طلب تعديل
+								</label>
+							</li>
+							<li className="relative">
+								<input
+									className="sr-only peer"
+									type="radio"
+									value="refuse"
+									{...register("statue", { required: true })}
+									id="refuse"
+								/>
+								<label
+									className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00] peer-checked:ring-red-500 peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
+									htmlFor="refuse"
+								>
+									رفض
+								</label>
+							</li>
+						</ul>
+						<p>{errors.statue?.type === "required" && "يرجي الإختيار.."}</p>
+					</div>
+					{watchReasons === "refuse" && (
+						<div className="mt-8 relative">
+							<select
+								id="rejectionReasons"
+								className="relative bg-[#DADADA36] border-0 text-gray-900 text-lg rounded-2xl focus:ring-[#EDAA00] focus:border-0 block w-full py-6 px-8  "
+								{...register("refuseReasons", {
+									required: watchReasons === "refuse" ? true : false,
+								})}
+							>
+								{refuseReasons.map((item, index) => {
+									return (
+										<option
+											onChange={() => {
+												setRefuseReason(item);
+											}}
+											key={index++}
+											value={item.name}
+										>
+											{item.name}
+										</option>
+									);
+								})}
+							</select>
+							<div className=" absolute top-6 left-6"> {ArrowIcon}</div>
+						</div>
+					)}
+					<div className="mt-10">
+						<button
+							type="submit"
+							className="font-semibold rounded-full py-5  px-24  bg-[#343434] text-white   hover:bg-[#EDAA00]  transition-all duration-200"
+						>
+							<span>إرسال</span>
+						</button>
+					</div>
+				</form>
+			)}
+		</section>
+	);
+};
+
+const CustomerInfo = ({ customerInfo }) => {
 	const formatedBirthDate =
 		(customerInfo.dateOfBirth &&
 			moment(customerInfo.dateOfBirth).format("YYYY-MM-DD")) ||
 		"";
 	return (
-		<section className="w-full px-12">
-			{/* {customerDocs && (
-				<div className="mb-8">
-					<div className="flex flex-col items-start">
-						<h2 className="mb-4 text-2xl font-bold ">مستندات العميل </h2>
-						<div className="grid grid-cols-3 gap-6">
-							{customerDocs &&
-								customerDocs.map((doc, index) => {
-									if (doc.url) {
-										return (
-											<div key={index++} className="ml-6 ">
-												<h5 className=" mb-6">{doc.documentDescription}</h5>
-												<a
-													href={doc.url}
-													download={doc.documentDescription}
-													target="_blank"
-													rel="noopener noreferrer"
-												>
-													<button className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
-														{FolderNameIcon}
-														<span className="mr-3">
-															{doc.documentDescription}
-														</span>
-														<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
-															{ViewEye}
-														</div>
-													</button>
-												</a>
-											</div>
-										);
-									}
-								})}
-						</div>
-					</div>
-				</div>
-			)} */}
-
-			{/* customer info  */}
-
+		<>
 			{customerInfo && (
 				<div className="mb-12">
 					<h2 className="mb-6 text-2xl font-bold ">معلومات العميل </h2>
@@ -267,7 +549,7 @@ export const CustomerDetails = ({
 							</div>
 						)}
 					</div>
-					<div className="grid grid-cols-2 gap-x-8 gap-y-6 w-10/12">
+					<div className="grid grid-cols-3 gap-x-8 gap-y-6 ">
 						{customerInfo.nationalID && (
 							<div>
 								<h5 className="my-3 font-medium">الرقم القومي</h5>
@@ -377,454 +659,29 @@ export const CustomerDetails = ({
 					</div>
 				</div>
 			)}
-
-			{/* {customerInfo.customerCalculation && (
-				<div className="flex flex-col items-start ">
-					<div className="w-full">
-						<h2 className="mb-6 text-2xl font-bold">نتيجة التقييم</h2>
-						<div className="grid grid-cols-2 gap-x-8 gap-y-6 w-10/12 mb-12">
-							<div className=" w-full">
-								<h5 className="my-3 "> تقييم الIscore</h5>
-								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-									{customerInfo.customerCalculation.iScoreScore}
-								</p>
-							</div>
-							<div className=" w-full">
-								<h5 className="my-3 "> دخل المعلن</h5>
-								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-									{customerInfo.customerCalculation.assumedIncome}
-								</p>
-							</div>
-							<div className=" flex  min-w-full gap-6">
-								{customerInfo.customerCalculation.iScoreFileUrl && (
-									<div className=" flex-shrink-0">
-										<a
-											href={customerInfo.customerCalculation.iScoreFileUrl}
-											download={customerInfo.customerCalculation.iScoreFileUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="w-full"
-										>
-											<button className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center w-full">
-												{FolderNameIcon}
-												<span className="mr-4">
-													{customerInfo.customerCalculation.iScoreFileUrl &&
-														"Iscore"}
-												</span>
-												<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
-													{ViewEye}
-												</div>
-											</button>
-										</a>
-									</div>
-								)}
-								{customerInfo.customerCalculation.homeVisitFileUrl && (
-									<div className=" flex-shrink-0">
-										<a
-											href={customerInfo.customerCalculation.homeVisitFileUrl}
-											download={
-												customerInfo.customerCalculation.homeVisitFileUrl
-											}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											<button className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
-												{FolderNameIcon}
-												<span className="mr-4">
-													{customerInfo.customerCalculation.homeVisitFileUrl &&
-														"زيارة العمل"}
-												</span>
-												<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
-													{ViewEye}
-												</div>
-											</button>
-										</a>
-									</div>
-								)}
-
-								{customerInfo.customerCalculation.workVisitFileUrl && (
-									<div className="flex-shrink-0">
-										<a
-											href={customerInfo.customerCalculation.workVisitFileUrl}
-											download={
-												customerInfo.customerCalculation.workVisitFileUrl
-											}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											<button className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
-												{FolderNameIcon}
-												<span className="mr-4">
-													{customerInfo.customerCalculation.workVisitFileUrl &&
-														"زيارة المنزل"}
-												</span>
-												<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
-													{ViewEye}
-												</div>
-											</button>
-										</a>
-									</div>
-								)}
-							</div>
-						</div>
-					</div>
-				</div>
-			)} */}
-			{/* customerScoring */}
-			{/* {customerInfo && customerInfo.customerScoring && (
-				<div className="mb-12">
-					<h2 className="mb-6 text-2xl font-bold">شريحة العميل </h2>
-					<div className="grid grid-cols-2 gap-x-8 gap-y-6 w-10/12">
-						<div>
-							<h5 className="my-3 font-medium">حد التمويل</h5>
-							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
-								{customerInfo.customerScoring.exposureLimit}
-							</p>
-						</div>
-						<div>
-							<h5 className="my-3 font-medium">DBR</h5>
-							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-								{customerInfo.customerScoring.dpr}
-							</p>
-						</div>
-						<div>
-							<h5 className="my-3 font-medium"> شريحة العميل</h5>
-							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-								{customerInfo.customerScoring.segmentation === 1 && "Prestige"}
-								{customerInfo.customerScoring.segmentation === 2 && "Elite"}
-								{customerInfo.customerScoring.segmentation === 3 &&
-									"Select Plus"}
-								{customerInfo.customerScoring.segmentation === 4 && "Select"}{" "}
-							</p>
-						</div>
-						<div>
-							<h5 className="my-3 font-medium">شريحة التسعير</h5>
-							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-								{customerInfo.customerScoring.pricing === 1 && "A"}
-								{customerInfo.customerScoring.pricing === 2 && "B"}
-								{customerInfo.customerScoring.pricing === 3 && "C"}
-								{customerInfo.customerScoring.pricing === 4 && "D"}
-							</p>
-						</div>
-						<div>
-							<h5 className="my-3 font-medium">سعر فائدة السلعة المعمرة</h5>
-							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-								{customerInfo.customerScoring.cgfRate}
-							</p>
-						</div>
-						<div>
-							<p className="my-3 font-medium">حد السلعة المعمرة</p>
-							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
-								{customerInfo.customerScoring.cgfLimit}
-							</p>
-						</div>
-					</div>
-				</div>
-			)} */}
-
-			{disableAction ? null : (
-				<form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-10/12">
-					{/* customer rate */}
-					<div className=" border-t border-b py-8">
-						<h2 className="mb-6 text-2xl font-bold ">بيانات التقييم </h2>
-						<div className="grid grid-cols-2 gap-6">
-							<div className=" w-full space-y-4">
-								<label htmlFor="pricing" className="font-semibold">
-									شريحة التسعير
-								</label>
-								<CustomDropDown
-									option={pricing}
-									selectOption={setPricing}
-									items={pricingList}
-									icon={Arrow}
-									className=" text-black  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
-								/>
-							</div>
-							<div className=" w-full space-y-5">
-								<label htmlFor="assumedIncome" className="font-semibold">
-									دخل العميل المفترض
-								</label>
-								<input
-									type="number"
-									placeholder="0"
-									{...register("assumedIncome")}
-									className={buttonClass}
-								/>
-							</div>
-							<div className=" w-full space-y-5">
-								<label htmlFor="iScoreScore" className="font-semibold">
-									تقييم الIscore
-								</label>
-								<input
-									type="number"
-									placeholder="0"
-									{...register("iScoreScore")}
-									className={buttonClass}
-								/>
-							</div>
-
-							<div className=" w-full space-y-5">
-								<label htmlFor="creditCard" className="font-semibold">
-									Credit Card
-								</label>
-								<input
-									type="string"
-									placeholder="0"
-									{...register("creditCard")}
-									className={buttonClass}
-								/>
-							</div>
-							<div className=" w-full space-y-5">
-								<label htmlFor="personalLoan" className="font-semibold">
-									Personal Loan
-								</label>
-								<input
-									type="number"
-									placeholder="0"
-									{...register("personalLoan")}
-									className={buttonClass}
-								/>
-							</div>
-							<div className=" w-full space-y-5">
-								<label htmlFor="autoLoan" className="font-semibold">
-									Auto Loan
-								</label>
-								<input
-									type="number"
-									placeholder="0"
-									{...register("autoLoan")}
-									className={buttonClass}
-								/>
-							</div>
-							<div className=" w-full space-y-5">
-								<label htmlFor="overDraft" className="font-semibold">
-									Over Draft
-								</label>
-								<input
-									type="number"
-									placeholder="0"
-									{...register("overDraft")}
-									className={buttonClass}
-								/>
-							</div>
-						</div>
-						{/* <div className=" mt-6  ">
-								<h2 className=" font-bold  mb-4 text-xl">مستندات التقييم</h2>
-								<div className="flex items-center gap-8 w-full">
-									{customerInfo.customerCalculation &&
-									customerInfo.customerCalculation.iScoreFileUrl ? (
-										<div className="">
-											<p className="mt-3 mb-6">Iscore</p>
-											<a
-												href={customerInfo.customerCalculation.iScoreFileUrl}
-												download={"Iscore"}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												<div className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
-													{FolderNameIcon}
-													<span className="mr-4">Iscore</span>
-													<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
-														{ViewEye}
-													</div>
-												</div>
-											</a>
-										</div>
-									) : (
-										<FileUploader
-											fileName={"Iscore"}
-											EntityID={customerInfo.customerID}
-											EntityType={1}
-											TypeID={312}
-											setUrl={setIscoreUrl}
-										/>
-									)}
-
-									{customerInfo.customerCalculation &&
-									customerInfo.customerCalculation.homeVisitFileUrl ? (
-										<div>
-											<p className="mt-3 mb-6">إستعلام منزلي</p>
-											<a
-												href={customerInfo.customerCalculation.homeVisitFileUrl}
-												download={"إستعلام منزلي"}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												<div className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
-													{FolderNameIcon}
-													<span className="mr-4">إستعلام منزلي</span>
-													<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
-														{ViewEye}
-													</div>
-												</div>
-											</a>
-										</div>
-									) : (
-										<FileUploader
-											fileName={"إستعلام منزلي"}
-											EntityID={customerInfo.customerID}
-											EntityType={1}
-											TypeID={313}
-											setUrl={setHomeVisitUrl}
-										/>
-									)}
-									{customerInfo.customerCalculation &&
-									customerInfo.customerCalculation.workVisitFileUrl ? (
-										<div>
-											<p className="mt-3 mb-6">إستعلام عمل</p>
-											<a
-												href={customerInfo.customerCalculation.workVisitFileUrl}
-												download={"إستعلام عمل"}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												<div className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
-													{FolderNameIcon}
-													<span className="mr-4">إستعلام عمل</span>
-													<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
-														{ViewEye}
-													</div>
-												</div>
-											</a>
-										</div>
-									) : (
-										<FileUploader
-											fileName={"إستعلام عمل"}
-											EntityID={customerInfo.customerID}
-											EntityType={1}
-											TypeID={314}
-											setUrl={setWorkVisitUrl}
-										/>
-									)}
-								</div>
-							</div> */}
-					</div>
-
-					{/* actions */}
-					<div className="w-full space-y-5">
-						<h5 className="font-bold text-2xl ">ملاحظة</h5>
-						<div className="h-32">
-							<textarea
-								{...register("notes", {
-									required: watchReasons === "requestForEdit" ? true : false,
-								})}
-								className="resize-none p-6   w-full rounded-3xl h-full bg-[#9797971A] border-0 focus:outline-none"
-							/>
-						</div>
-					</div>
-
-					<div className="mt-8">
-						<ul className="flex items-center px-6 py-4 bg-[#DADADA36] rounded-full space-x-4">
-							<li className="relative ml-4">
-								<input
-									className="sr-only peer"
-									type="radio"
-									value="save"
-									{...register("statue", { required: true })}
-									id="save"
-								/>
-								<label
-									className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00] peer-checked:ring-red-500 peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
-									htmlFor="save"
-								>
-									حفظ
-								</label>
-							</li>
-							<li className="relative  ">
-								<input
-									className="sr-only peer"
-									type="radio"
-									value="accept"
-									{...register("statue", { required: true })}
-									id="accept"
-								/>
-								<label
-									className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00] peer-checked:ring-red-500 peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
-									htmlFor="accept"
-								>
-									قبول
-								</label>
-							</li>
-
-							<li className="relative ">
-								<input
-									className="sr-only peer"
-									type="radio"
-									value="requestForEdit"
-									{...register("statue", { required: true })}
-									id="edit"
-								/>
-								<label
-									className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00] peer-checked:ring-red-500 peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
-									htmlFor="edit"
-								>
-									طلب تعديل
-								</label>
-							</li>
-							<li className="relative">
-								<input
-									className="sr-only peer"
-									type="radio"
-									value="refuse"
-									{...register("statue", { required: true })}
-									id="refuse"
-								/>
-								<label
-									className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00] peer-checked:ring-red-500 peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
-									htmlFor="refuse"
-								>
-									رفض
-								</label>
-							</li>
-						</ul>
-						<p>{errors.statue?.type === "required" && "يرجي الإختيار.."}</p>
-					</div>
-					{watchReasons === "refuse" && (
-						<div className="mt-8">
-							<div className="relative">
-								<select
-									id="rejectionReasons"
-									className="bg-[#DADADA36] border-0 text-gray-900 text-lg rounded-2xl focus:ring-[#EDAA00] focus:border-0 block w-full py-6 px-8 "
-									{...register("refuseReasons", {
-										required: watchReasons === "refuse" ? true : false,
-									})}
-								>
-									{reasons.map((item, index) => {
-										return (
-											<option
-												onChange={() => {
-													setRefuseReason(item);
-												}}
-												key={index++}
-												value={item.name}
-											>
-												{item.name}
-											</option>
-										);
-									})}
-								</select>
-								<div className=" absolute top-6 left-6"> {ArrowIcon}</div>
-							</div>
-						</div>
-					)}
-					<div className="mt-10 flex justify-end w-full">
-						<button
-							// disabled={
-							// 	watchReasons === "accept" &&
-							// 	(segmentation.value === 0 || pricing.value === 0)
-							// }
-							type="submit"
-							className=" font-semibold rounded-full  bg-[#343434]   text-white flex rtl:flex-row-reverse justify-center items-center  py-5  px-24  group hover:bg-[#EDAA00]  transition-all duration-200"
-						>
-							<span className="group-hover:text-primary">إرسال</span>
-						</button>
-					</div>
-				</form>
-			)}
-		</section>
+		</>
 	);
 };
 
+const ActionButton = ({ name, register, text }) => {
+	return (
+		<li className="relative ml-4">
+			<input
+				className="sr-only peer"
+				type="radio"
+				value="save"
+				{...register({ name }, { required: true })}
+				id="save"
+			/>
+			<label
+				className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00]  peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
+				htmlFor="save"
+			>
+				{text}
+			</label>
+		</li>
+	);
+};
 const Person = (
 	<svg
 		width="39"
@@ -923,6 +780,286 @@ const Person = (
 		</defs>
 	</svg>
 );
+
+{
+	/* {customerDocs && (
+				<div className="mb-8">
+					<div className="flex flex-col items-start">
+						<h2 className="mb-4 text-2xl font-bold ">مستندات العميل </h2>
+						<div className="grid grid-cols-3 gap-6">
+							{customerDocs &&
+								customerDocs.map((doc, index) => {
+										return (
+											<div key={index++} className="ml-6 ">
+												<h5 className=" mb-6">{doc.documentDescription}</h5>
+												<a
+													href={doc.url}
+													download={doc.documentDescription}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													<button className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
+														{FolderNameIcon}
+														<span className="mr-3">
+															{doc.documentDescription}
+														</span>
+														<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
+															{ViewEye}
+														</div>
+													</button>
+												</a>
+											</div>
+										);
+									
+								})}
+						</div>
+					</div>
+				</div>
+			)} */
+}
+
+{
+	/* {customerInfo.customerCalculation && (
+				<div className="flex flex-col items-start ">
+					<div className="w-full">
+						<h2 className="mb-6 text-2xl font-bold">نتيجة التقييم</h2>
+						<div className="grid grid-cols-2 gap-x-8 gap-y-6 w-10/12 mb-12">
+							<div className=" w-full">
+								<h5 className="my-3 "> تقييم الIscore</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{customerInfo.customerCalculation.iScoreScore}
+								</p>
+							</div>
+							<div className=" w-full">
+								<h5 className="my-3 "> دخل المعلن</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
+									{customerInfo.customerCalculation.assumedIncome}
+								</p>
+							</div>
+							<div className=" flex  min-w-full gap-6">
+								{customerInfo.customerCalculation.iScoreFileUrl && (
+									<div className=" flex-shrink-0">
+										<a
+											href={customerInfo.customerCalculation.iScoreFileUrl}
+											download={customerInfo.customerCalculation.iScoreFileUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="w-full"
+										>
+											<button className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center w-full">
+												{FolderNameIcon}
+												<span className="mr-4">
+													{customerInfo.customerCalculation.iScoreFileUrl &&
+														"Iscore"}
+												</span>
+												<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
+													{ViewEye}
+												</div>
+											</button>
+										</a>
+									</div>
+								)}
+								{customerInfo.customerCalculation.homeVisitFileUrl && (
+									<div className=" flex-shrink-0">
+										<a
+											href={customerInfo.customerCalculation.homeVisitFileUrl}
+											download={
+												customerInfo.customerCalculation.homeVisitFileUrl
+											}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											<button className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
+												{FolderNameIcon}
+												<span className="mr-4">
+													{customerInfo.customerCalculation.homeVisitFileUrl &&
+														"زيارة العمل"}
+												</span>
+												<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
+													{ViewEye}
+												</div>
+											</button>
+										</a>
+									</div>
+								)}
+
+								{customerInfo.customerCalculation.workVisitFileUrl && (
+									<div className="flex-shrink-0">
+										<a
+											href={customerInfo.customerCalculation.workVisitFileUrl}
+											download={
+												customerInfo.customerCalculation.workVisitFileUrl
+											}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											<button className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
+												{FolderNameIcon}
+												<span className="mr-4">
+													{customerInfo.customerCalculation.workVisitFileUrl &&
+														"زيارة المنزل"}
+												</span>
+												<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
+													{ViewEye}
+												</div>
+											</button>
+										</a>
+									</div>
+								)}
+							</div>
+						</div>
+					</div>
+				</div>
+			)} */
+}
+{
+	/* customerScoring */
+}
+{
+	/* {customerInfo && customerInfo.customerScoring && (
+				<div className="mb-12">
+					<h2 className="mb-6 text-2xl font-bold">شريحة العميل </h2>
+					<div className="grid grid-cols-2 gap-x-8 gap-y-6 w-10/12">
+						<div>
+							<h5 className="my-3 font-medium">حد التمويل</h5>
+							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]    ">
+								{customerInfo.customerScoring.exposureLimit}
+							</p>
+						</div>
+						<div>
+							<h5 className="my-3 font-medium">DBR</h5>
+							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+								{customerInfo.customerScoring.dpr}
+							</p>
+						</div>
+						<div>
+							<h5 className="my-3 font-medium"> شريحة العميل</h5>
+							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+								{customerInfo.customerScoring.segmentation === 1 && "Prestige"}
+								{customerInfo.customerScoring.segmentation === 2 && "Elite"}
+								{customerInfo.customerScoring.segmentation === 3 &&
+									"Select Plus"}
+								{customerInfo.customerScoring.segmentation === 4 && "Select"}{" "}
+							</p>
+						</div>
+						<div>
+							<h5 className="my-3 font-medium">شريحة التسعير</h5>
+							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+								{customerInfo.customerScoring.pricing === 1 && "A"}
+								{customerInfo.customerScoring.pricing === 2 && "B"}
+								{customerInfo.customerScoring.pricing === 3 && "C"}
+								{customerInfo.customerScoring.pricing === 4 && "D"}
+							</p>
+						</div>
+						<div>
+							<h5 className="my-3 font-medium">سعر فائدة السلعة المعمرة</h5>
+							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+								{customerInfo.customerScoring.cgfRate}
+							</p>
+						</div>
+						<div>
+							<p className="my-3 font-medium">حد السلعة المعمرة</p>
+							<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+								{customerInfo.customerScoring.cgfLimit}
+							</p>
+						</div>
+					</div>
+				</div>
+			)} */
+}
+
+{
+	/* <div className=" mt-6  ">
+								<h2 className=" font-bold  mb-4 text-xl">مستندات التقييم</h2>
+								<div className="flex items-center gap-8 w-full">
+									{customerInfo.customerCalculation &&
+									customerInfo.customerCalculation.iScoreFileUrl ? (
+										<div className="">
+											<p className="mt-3 mb-6">Iscore</p>
+											<a
+												href={customerInfo.customerCalculation.iScoreFileUrl}
+												download={"Iscore"}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												<div className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
+													{FolderNameIcon}
+													<span className="mr-4">Iscore</span>
+													<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
+														{ViewEye}
+													</div>
+												</div>
+											</a>
+										</div>
+									) : (
+										<FileUploader
+											fileName={"Iscore"}
+											EntityID={customerInfo.customerID}
+											EntityType={1}
+											TypeID={312}
+											setUrl={setIscoreUrl}
+										/>
+									)}
+
+									{customerInfo.customerCalculation &&
+									customerInfo.customerCalculation.homeVisitFileUrl ? (
+										<div>
+											<p className="mt-3 mb-6">إستعلام منزلي</p>
+											<a
+												href={customerInfo.customerCalculation.homeVisitFileUrl}
+												download={"إستعلام منزلي"}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												<div className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
+													{FolderNameIcon}
+													<span className="mr-4">إستعلام منزلي</span>
+													<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
+														{ViewEye}
+													</div>
+												</div>
+											</a>
+										</div>
+									) : (
+										<FileUploader
+											fileName={"إستعلام منزلي"}
+											EntityID={customerInfo.customerID}
+											EntityType={1}
+											TypeID={313}
+											setUrl={setHomeVisitUrl}
+										/>
+									)}
+									{customerInfo.customerCalculation &&
+									customerInfo.customerCalculation.workVisitFileUrl ? (
+										<div>
+											<p className="mt-3 mb-6">إستعلام عمل</p>
+											<a
+												href={customerInfo.customerCalculation.workVisitFileUrl}
+												download={"إستعلام عمل"}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												<div className=" relative py-5 px-8 text-[#9099A9] font-semibold   rounded-xl border border-dashed border-[#999999] flex items-center">
+													{FolderNameIcon}
+													<span className="mr-4">إستعلام عمل</span>
+													<div className=" absolute -top-4 -right-4 bg-white p-2 border border-[#9099A9] rounded-full">
+														{ViewEye}
+													</div>
+												</div>
+											</a>
+										</div>
+									) : (
+										<FileUploader
+											fileName={"إستعلام عمل"}
+											EntityID={customerInfo.customerID}
+											EntityType={1}
+											TypeID={314}
+											setUrl={setWorkVisitUrl}
+										/>
+									)}
+								</div>
+							</div> */
+}
 
 const ViewEye = (
 	<svg

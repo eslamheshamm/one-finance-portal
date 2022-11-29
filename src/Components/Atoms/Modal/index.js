@@ -1,9 +1,10 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
+import { ClockLoader } from "react-spinners";
 
 export default function Modal({
 	isOpen,
-	setIsOpen,
+	onClose,
 	title,
 	text,
 	type,
@@ -18,7 +19,7 @@ export default function Modal({
 				<Dialog
 					as="div"
 					className="relative z-10  font-Cairo"
-					onClose={() => setIsOpen(false)}
+					onClose={onClose}
 					dir="rtl"
 				>
 					<Transition.Child
@@ -44,24 +45,33 @@ export default function Modal({
 								leaveTo="opacity-0 scale-95"
 							>
 								<Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6   shadow-xl transition-all">
-									<div className="flex  justify-center mb-4">
+									<div className="flex  justify-center">
 										{type === "success" && SuccesIcon}
 										{type === "error" && ErrorIcon}
+										{type === "loading" && (
+											<div className="py-12">
+												<ClockLoader
+													color="#EDAA00"
+													size={64}
+													loading={isOpen}
+												/>
+											</div>
+										)}
 									</div>
 									{title && (
 										<Dialog.Title
 											as="h3"
-											className="text-xl font-bold leading-6 text-gray-900"
+											className="text-xl font-bold leading-6 text-gray-900 mt-4 mb-6"
 										>
 											{title}
 										</Dialog.Title>
 									)}
 									{text && (
-										<p className="mt-4 text-sm text-right text-gray-500">
+										<p className=" mb-6 text-sm text-right text-gray-500">
 											{text}
 										</p>
 									)}
-									<div className="mt-6 flex justify-center items-center gap-6">
+									<div className=" flex justify-center items-center gap-6">
 										{onAccept && (
 											<button
 												type="button"

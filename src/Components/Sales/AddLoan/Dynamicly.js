@@ -26,10 +26,12 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 		id: -1,
 	});
 	const [loanInstallments, setLoanInstallments] = useState(0);
-	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalBody, setModalBody] = useState({
 		title: "",
 		text: "",
+		isOpen: false,
+		onAccept: () => {},
+		onClose: () => {},
 	});
 	// const [requetedLoanDocs, setRequetedLoanDocs] = useState(null);
 	// const [loadingDocs, setLoadingDocs] = useState(false);
@@ -98,11 +100,13 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 			})
 			.then((res) => {
 				toast.dismiss(loading);
-				setIsModalOpen(true);
 				setModalBody({
 					title: "لقد حدث خطأ!",
 					text: "لقد تخطي العميل الحد الأقصى للتمويل, يرجي تعديل قيمة التمويل",
 					type: "error",
+					isOpen: true,
+					onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+					onClose: () => setModalBody({ ...modalBody, isOpen: false }),
 				});
 
 				if (res.data.isSuccess) {
@@ -142,14 +146,12 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 	return (
 		<section className="  bg-white  rounded-3xl ">
 			<Modal
-				isOpen={isModalOpen}
-				setIsOpen={setIsModalOpen}
+				isOpen={modalBody.isOpen}
+				onClose={modalBody.onClose}
 				title={modalBody.title}
 				text={modalBody.text}
 				type={modalBody.type}
-				onAccept={() => {
-					setIsModalOpen(false);
-				}}
+				onAccept={modalBody.onAccept}
 				discardBtntext="إلغاء"
 				acceptBtnText="تأكيد"
 			/>
