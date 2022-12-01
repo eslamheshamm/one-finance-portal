@@ -6,7 +6,7 @@ import { ClipLoader } from "react-spinners";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../../../src/Utils/Services/apiClient";
 
-const CityClubSalesPage = () => {
+const AddLoaDynamicPage = () => {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const { id } = router.query;
@@ -45,4 +45,4 @@ const CityClubSalesPage = () => {
 		</DashboardLayout>
 	);
 };
-export default CityClubSalesPage;
+export default AddLoaDynamicPage;

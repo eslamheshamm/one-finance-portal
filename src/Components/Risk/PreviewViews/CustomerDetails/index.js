@@ -4,9 +4,9 @@ import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import moment from "moment";
 
-import { CustomDropDown } from "../../../Atomics/CustomDropDown";
 import apiClient from "../../../../Utils/Services/apiClient";
 import Modal from "../../../Atoms/Modal";
+import { CustomDropDown } from "../../../Atoms/FormInputs/DropDown";
 // import { FileUploader } from "../../Atomics/Files/FileUploader";
 
 moment.locale("en");

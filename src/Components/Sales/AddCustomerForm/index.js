@@ -86,11 +86,19 @@ const AddCustomerForm = () => {
 		status: "يرجي الإختيار",
 		ownershipHomeID: -1,
 	});
+	const [homeType, setHomeType] = useState({
+		residencyTypeStatus: "يرجي الإختيار",
+		residencyTypeID: -1,
+	});
+
 	const [secondHome, setSecondHome] = useState({
 		status: "يرجي الإختيار",
 		secondHomeID: -1,
 	});
-
+	const [secondHomeType, setSecondHomeType] = useState({
+		residencyTypeStatus: "يرجي الإختيار",
+		residencyTypeID: -1,
+	});
 	const { dateOfBirth, gender } = useIdnoInfo(idnoWatch);
 
 	const handleSaveCustomer = (data) => {
@@ -197,10 +205,6 @@ const AddCustomerForm = () => {
 					setValue("businessAddress", customer.businessAddress);
 					setValue("businessName", customer.businessName);
 					setValue("Income", customer.monthlyIncome);
-					// setGovList({
-					// 	name: customer.govNameAR,
-					// 	govID: customer.govID,
-					// });
 				}
 			})
 			.catch(() => {
@@ -513,11 +517,18 @@ const AddCustomerForm = () => {
 								setClubsList={setClubsList}
 							/>
 						</div>
-						<div className="grid grid-cols-2 gap-5">
-							<OwnHomeDropDown home={home} setHome={setHome} />
+						<div className="grid  gap-5">
+							<OwnHomeDropDown
+								homeType={homeType}
+								setHomeType={setHomeType}
+								home={home}
+								setHome={setHome}
+							/>
 							<OwnSecondHomeDropDown
 								secondHome={secondHome}
 								setSecondHome={setSecondHome}
+								secondHomeType={secondHomeType}
+								setSecondHomeType={setSecondHomeType}
 							/>
 						</div>
 					</div>
