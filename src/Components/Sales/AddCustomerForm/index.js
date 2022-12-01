@@ -133,10 +133,7 @@ const AddCustomerForm = () => {
 			})
 			.then(({ data }) => {
 				toast.dismiss(loading);
-				console.log(data, "cussss");
 				if (data.isSuccess) {
-					toast.success("تم حفظ العميل بنجاح.");
-					console.log(data.data.customerID, "iddd");
 					setCustomerId(data.data.customerID);
 				}
 			})
@@ -232,6 +229,7 @@ const AddCustomerForm = () => {
 	// useEffect(() => {
 	// 	GetCustomerDocs();
 	// }, [customerId]);
+
 	const nationalIdButtonClass =
 		" cursor-pointer  rounded-full font-bold   flex justify-center items-center  p-6  w-full  text-black   bg-[#EDAA00]  transition-all duration-200";
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full border-0 ring-0 focus:ring-0 `;
