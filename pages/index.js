@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -23,7 +23,11 @@ export default function Home() {
 		);
 	}
 
-	if (status === "authenticated") {
+	if (
+		status === "authenticated" &&
+		session.user.data &&
+		session.user.data.roleID
+	) {
 		if (session.user.data.roleID === 4) {
 			router.push("/sales/customers/add");
 		} else if (session.user.data.roleID === 14) {
@@ -39,9 +43,29 @@ export default function Home() {
 			return (
 				<div className="flex justify-center items-center min-h-screen ">
 					<h1 className="text-2xl">لا يوجد صلاحيات</h1>
+					<button
+						onClick={() => {
+							signOut();
+						}}
+						className="rounded-2xl  bg-black text-white px-12 py-4"
+					>
+						تسجيل الخروج
+					</button>
 				</div>
 			);
 		}
+	} else {
+		<div className="flex justify-center items-center min-h-screen ">
+			<h1 className="text-2xl">لا يوجد صلاحيات</h1>
+			<button
+				onClick={() => {
+					signOut();
+				}}
+				className="rounded-2xl  bg-black text-white px-12 py-4"
+			>
+				تسجيل الخروج
+			</button>
+		</div>;
 	}
 
 	return (
@@ -60,6 +84,7 @@ export default function Home() {
 				/>
 				<link rel="icon" href="/favicon.svg" />
 			</Head>
+
 			<ClipLoader color={"#F9CD09"} size={48} aria-label="Loading Spinner" />
 		</div>
 	);
