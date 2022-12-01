@@ -7,7 +7,7 @@ import { getSession } from "next-auth/react";
 // https://test.onefinance-eg.com:8000
 
 // new api https://192.168.100.2:8001/
-const baseURL = ` http://192.168.100.2:8002`;
+const baseURL = `http://test.onefinance-eg.com:8002`;
 
 const ApiClient = () => {
 	const defaultOptions = {

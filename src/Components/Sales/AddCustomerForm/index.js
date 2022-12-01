@@ -335,16 +335,17 @@ const AddCustomerForm = () => {
 						</div>
 					</div>
 					{/* Address  */}
-					<div className="flex flex-col gap-5">
-						<AddressDropDown
-							govList={govList}
-							setGovList={setGovList}
-							cityList={cityList}
-							setCityList={setCityList}
-							districtList={districtList}
-							setDistrictList={setDistrictList}
-						/>
-						<div className=" w-full  col-span-2 space-y-3">
+
+					<AddressDropDown
+						govList={govList}
+						setGovList={setGovList}
+						cityList={cityList}
+						setCityList={setCityList}
+						districtList={districtList}
+						setDistrictList={setDistrictList}
+					/>
+					<div className="grid grid-cols-2 gap-5">
+						<div className=" w-full   space-y-3">
 							<label className="font-semibold">العنوان</label>
 							<input
 								type="string"
@@ -353,7 +354,7 @@ const AddCustomerForm = () => {
 								className={buttonClass}
 							/>
 						</div>
-						<div className=" w-full col-span-2 space-y-3">
+						<div className=" w-full space-y-3">
 							<label htmlFor="InvestigationAddress" className="font-semibold">
 								عنوان الإستعلام
 							</label>
@@ -419,7 +420,7 @@ const AddCustomerForm = () => {
 					</div>
 					{/* job & salary */}
 					<div className="grid gap-6 ">
-						<div className="grid grid-cols-3 gap-x-6">
+						<div className="grid grid-cols-4 gap-x-6">
 							{/*  */}
 							<div className=" w-full space-y-3">
 								<label htmlFor="JobTitle" className="font-semibold">
@@ -454,8 +455,6 @@ const AddCustomerForm = () => {
 									className={buttonClass}
 								/>
 							</div>
-						</div>
-						<div className="grid gap-6">
 							<div className=" w-full space-y-3 ">
 								<label htmlFor="businessAddress" className="font-semibold">
 									عنوان جهة العمل
@@ -467,6 +466,8 @@ const AddCustomerForm = () => {
 									className={buttonClass}
 								/>
 							</div>
+						</div>
+						<div className="grid gap-6">
 							<div className=" w-full space-y-3">
 								<label htmlFor="Income" className="font-semibold">
 									الدخل الشهري
@@ -517,7 +518,7 @@ const AddCustomerForm = () => {
 								setClubsList={setClubsList}
 							/>
 						</div>
-						<div className="grid  gap-5">
+						<div className="grid  gap-5 grid-cols-2">
 							<OwnHomeDropDown
 								homeType={homeType}
 								setHomeType={setHomeType}
