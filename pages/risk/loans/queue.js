@@ -14,12 +14,12 @@ import apiClient from "../../../src/Utils/Services/apiClient";
 const RiskPendingLoans = () => {
 	const { data: session, status } = useSession();
 	const [q, setQ] = useState("");
-	const [searchParam] = useState(["customer"]);
+	const [searchParam] = useState(["customerName"]);
 
 	const { isLoading, isError, isSuccess, data } = useQuery(
-		["pendingLoansQueue"],
+		["submitedLoansQueueRisk"],
 		async () => {
-			return await apiClient.get("/api/Loan/GetPendingLoans");
+			return await apiClient.get("/api/Loan/GetSubmitedLoans");
 		}
 	);
 
@@ -106,12 +106,12 @@ const RiskPendingLoans = () => {
 export default RiskPendingLoans;
 
 const LoanRequestPreview = ({
-	customer,
+	customerName,
 	sales,
-	product,
+	productName,
 	amount,
 	status,
-	id,
+	loanID,
 	...props
 }) => {
 	moment.locale("ar");
@@ -121,17 +121,9 @@ const LoanRequestPreview = ({
 	return (
 		<tr className="bg-white text-center text-[#6E7191]">
 			<td className="px-6 py-2">
-				<Link
-					href={{
-						pathname: "/risk/preview/loan/[id]",
-						query: { id: id },
-					}}
-				>
-					<div className="flex items-center cursor-pointer">
-						<span className="ml-4">{Person}</span>
-						<p>{customer}</p>
-					</div>
-				</Link>
+				<div className="flex items-center cursor-pointer">
+					<p>{customerName}</p>
+				</div>
 			</td>
 			<td className="px-6 py-2">
 				<div className="flex items-center">
@@ -140,7 +132,7 @@ const LoanRequestPreview = ({
 			</td>
 			<td className="px-6 py-2">
 				<div className="flex items-center">
-					<p>{product}</p>
+					<p>{productName}</p>
 				</div>
 			</td>
 			<td className="px-6 py-2">
@@ -153,7 +145,7 @@ const LoanRequestPreview = ({
 					<Link
 						href={{
 							pathname: "/risk/preview/loan/[id]",
-							query: { id: id },
+							query: { id: loanID },
 						}}
 					>
 						<button

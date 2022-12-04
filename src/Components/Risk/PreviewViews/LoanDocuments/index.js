@@ -37,6 +37,9 @@ export const LoanDocaments = ({
 	const [refuseReason, setRefuseReason] = useState("العبء الإئتماني لا يسمح");
 	const Add = reasons.map((Add) => Add);
 	// form
+	// setTimeout(() => {
+	// 	router.push("/risk/customers/queue");
+	// }, 2000);
 	const onSubmit = (data) => {
 		if (watchReasons === "accept") {
 			const loading = toast.loading("جاري قبول العميل..");
@@ -48,23 +51,10 @@ export const LoanDocaments = ({
 				})
 				.then((res) => {
 					toast.dismiss(loading);
-					if (res.data.message === "customer already approved") {
-						toast.error("هذا العميل تم قبوله بالفعل.");
-						setTimeout(() => {
-							router.push("/risk/customers/queue");
-						}, 2000);
-						return true;
-					}
+					console.log(res.data, "res");
 					if (res.data.isSuccess) {
 						toast.success("تم إكمال التمويل بنجاح.");
-						setTimeout(() => {
-							router.push("/risk/loans/completed");
-						}, 2000);
 					}
-					if (!res.data.isSuccess) {
-						toast.error("لقد حدث خطأ.");
-					}
-					console.log(res.data, "res");
 				})
 				.catch(() => {
 					toast.dismiss(loading);
@@ -84,12 +74,6 @@ export const LoanDocaments = ({
 					toast.dismiss(loading);
 					if (res.data.isSuccess) {
 						toast.success("تم رفض التمويل..");
-						setTimeout(() => {
-							router.push("/risk/customers/queue");
-						}, 1000);
-					}
-					if (!res.data.isSuccess) {
-						toast.error("لقد حدث خطأ.");
 						setTimeout(() => {
 							router.push("/risk/customers/queue");
 						}, 1000);

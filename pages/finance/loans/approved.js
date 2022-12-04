@@ -2,22 +2,24 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import classNames from "classnames";
 import Link from "next/link";
-import DashboardLayout from "../../../components/Dashboard/Layout";
-import apiClient from "../../../services/apiClient";
+
 import { DateRangePicker } from "react-date-range";
 import { addDays } from "date-fns";
+
 import "react-date-range/dist/styles.css"; // main style file
 import "react-date-range/dist/theme/default.css"; // theme css file
 
 import "moment/locale/ar";
 import moment from "moment";
+import apiClient from "../../../src/Utils/Services/apiClient";
+import DashboardLayout from "../../../src/Components/Layout";
 
 const FinanceApprovedLoans = () => {
 	const { data: session, status } = useSession();
-	const [q, setQ] = useState("");
-	const [searchParam] = useState(["customer"]);
+
 	const [customersData, setCustomersData] = useState([]);
 	const [loading, setLoading] = useState(false);
+
 	const GetApprovedLoansFinance = () => {
 		setLoading(true);
 		apiClient
@@ -41,8 +43,8 @@ const FinanceApprovedLoans = () => {
 			key: "selection",
 		},
 	]);
-	const [open, setOpen] = useState(false);
 
+	const [open, setOpen] = useState(false);
 	// get the target element to toggle
 	const refOne = useRef(null);
 	useEffect(() => {

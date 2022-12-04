@@ -1,37 +1,62 @@
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import DashboardLayout from "../../../../components/Dashboard/Layout";
+import { useRouter } from "next/router";
 import { Tab } from "@headlessui/react";
 import Image from "next/image";
-
-import apiClient from "../../../../services/apiClient";
-import { CustomerDetails } from "../../../../components/RiskProcess/CustomerDetails";
-import { LoanDetails } from "../../../../components/RiskProcess/LoanDetails";
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "next-auth/react";
-import { LoanRequestHistoryTimeLine } from "../../../../components/Shared/LoanRequestHistory";
-import { TabButton } from "../../../../components/Atomics/TabButton";
+
+// import { CustomerDetails } from "../../../../components/RiskProcess/CustomerDetails";
+// import { LoanDetails } from "../../../../components/RiskProcess/LoanDetails";
+// import { LoanRequestHistoryTimeLine } from "../../../../components/Shared/LoanRequestHistory";
+
+// import { TabButton } from "../../../../components/Atomics/TabButton";
+
+import apiClient from "../../../../src/Utils/Services/apiClient";
+import DashboardLayout from "../../../../src/Components/Layout";
+import { TabButton } from "../../../../src/Components/Atoms/TabButton";
+
+import { CustomerDetails } from "../../../../src/Components/Risk/PreviewViews/CustomerDetails";
+import { LoanDetails } from "../../../../src/Components/Risk/PreviewViews/LoanDetails";
+import { useQuery } from "@tanstack/react-query";
 
 const RiskLoanPreview = () => {
 	const { data: session } = useSession();
 	const router = useRouter();
 	const { id } = router.query;
-	const loanId = id;
 	const [selectedIndex, setSelectedIndex] = useState(1);
 	const [loanDetails, setLoanDetails] = useState(null);
 	const [customerInfo, setCustomerInfo] = useState(null);
 	const [customerDocs, setCustomerDocs] = useState(null);
 	const [requestHistory, setRequestHistory] = useState(null);
 
-	const handleSetLoanAsTaken = () => {
-		apiClient
-			.post("/api/Loan/SetLoanOnUser", {
-				user: session.user.id,
-				loanId: loanId,
-			})
-			.then((res) => {})
-			.catch((err) => {});
-	};
+	// const handleSetLoanAsTaken = () => {
+	// 	apiClient
+	// 		.post("/api/Loan/SetLoanOnUser", {
+	// 			user: session.user.id,
+	// 			loanId: loanId,
+	// 		})
+	// 		.then((res) => {})
+	// 		.catch((err) => {});
+	// };
+	const {
+		isLoading: isLoadingLoan,
+		isError: isErrorLoan,
+		isSuccess: isSuccesLoan,
+		data: dataLoan,
+	} = useQuery(
+		["LoanDetailsById", id],
+		async () => {
+			const res = await apiClient.get("/api/Loan/GetLoanDetails", {
+				params: { LoanID: id },
+			});
+			return res;
+		},
+		{
+			enabled: id !== undefined ? true : false,
+			refetchInterval: false,
+			refetchIntervalInBackground: false,
+		}
+	);
 
 	const GetRequstedLoanDetails = () => {
 		const loadingLoanDetails = toast.loading("جاري تحميل بيانات التمويل..");
@@ -51,49 +76,49 @@ const RiskLoanPreview = () => {
 			});
 	};
 
-	const GetLoanRequestHistory = () => {
-		const loadingLoanHistory = toast.loading("جاري تحميل تاريخ الطلب..");
-		apiClient
-			.post("/api/Loan/GetRequestHistory", {
-				loanId: loanId,
-			})
-			.then((res) => {
-				toast.dismiss(loadingLoanHistory);
-				if (res.data.isSuccess) {
-					setRequestHistory(res.data.loanHistory);
-				}
-			})
-			.catch(() => {
-				toast.dismiss(loadingLoanHistory);
-				toast.error("لقد حدث خطأ...");
-			});
-	};
-	const GetCustomerDocs = () => {
-		apiClient
-			.post("/api/Customer/GetRequestedCustomerDocuments", {
-				customerId: id,
-			})
-			.then((res) => {
-				if (res.data.isSuccess) {
-					setCustomerDocs(res.data.customerUploadDocuments);
-				}
-			})
-			.catch((err) => {
-				console.error(err);
-			});
-	};
-	useEffect(() => {
-		if (session && session.user.roleId === 3 && loanId) {
-			handleSetLoanAsTaken();
-		}
-	}, [loanId, session]);
-	useEffect(() => {
-		if (loanId) {
-			GetRequstedLoanDetails();
-			GetLoanRequestHistory();
-			GetCustomerDocs();
-		}
-	}, [loanId]);
+	// const GetLoanRequestHistory = () => {
+	// 	const loadingLoanHistory = toast.loading("جاري تحميل تاريخ الطلب..");
+	// 	apiClient
+	// 		.post("/api/Loan/GetRequestHistory", {
+	// 			loanId: loanId,
+	// 		})
+	// 		.then((res) => {
+	// 			toast.dismiss(loadingLoanHistory);
+	// 			if (res.data.isSuccess) {
+	// 				setRequestHistory(res.data.loanHistory);
+	// 			}
+	// 		})
+	// 		.catch(() => {
+	// 			toast.dismiss(loadingLoanHistory);
+	// 			toast.error("لقد حدث خطأ...");
+	// 		});
+	// };
+	// const GetCustomerDocs = () => {
+	// 	apiClient
+	// 		.post("/api/Customer/GetRequestedCustomerDocuments", {
+	// 			customerId: id,
+	// 		})
+	// 		.then((res) => {
+	// 			if (res.data.isSuccess) {
+	// 				setCustomerDocs(res.data.customerUploadDocuments);
+	// 			}
+	// 		})
+	// 		.catch((err) => {
+	// 			console.error(err);
+	// 		});
+	// };
+	// useEffect(() => {
+	// 	if (session && session.user.roleId === 3 && loanId) {
+	// 		handleSetLoanAsTaken();
+	// 	}
+	// }, [loanId, session]);
+	// useEffect(() => {
+	// 	if (loanId) {
+	// 		GetRequstedLoanDetails();
+	// GetLoanRequestHistory();
+	// GetCustomerDocs();
+	// 	}
+	// }, [loanId]);
 
 	return (
 		<DashboardLayout>
@@ -115,21 +140,23 @@ const RiskLoanPreview = () => {
 					</Tab.List>
 					<Tab.Panels className="px-8 pb-8 shadow-sm">
 						<Tab.Panel className="mt-20">
-							<CustomerDetails
-								disableAction={true}
-								customerInfo={customerInfo}
-								customerDocs={customerDocs}
-							/>
+							{isSuccesLoan && (
+								<CustomerDetails
+									disableAction={true}
+									customerInfo={dataLoan.data.data}
+									// customerDocs={customerDocs}
+								/>
+							)}
 						</Tab.Panel>
 						<Tab.Panel className="mt-20">
-							<LoanDetails loanDetails={loanDetails} />
+							{isSuccesLoan && <LoanDetails loanDetails={dataLoan.data.data} />}{" "}
 						</Tab.Panel>
 						<Tab.Panel className="mt-20">
 							<NoData />
 						</Tab.Panel>
-						<Tab.Panel>
+						{/* <Tab.Panel>
 							<LoanRequestHistoryTimeLine timeline={requestHistory} />
-						</Tab.Panel>
+						</Tab.Panel> */}
 					</Tab.Panels>
 				</Tab.Group>
 			</div>
