@@ -58,7 +58,6 @@ const AddCustomerForm = () => {
 		districtList: [],
 	});
 	// cars drop downs
-
 	const [carsList, setCarsList] = useState({
 		name: "",
 		vehicleID: -1,

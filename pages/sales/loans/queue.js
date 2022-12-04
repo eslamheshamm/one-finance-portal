@@ -11,7 +11,7 @@ import DashboardLayout from "../../../src/Components/Layout";
 import apiClient from "../../../src/Utils/Services/apiClient";
 
 const PendingLoansPage = () => {
-	const { data: session, status } = useSession();
+	// const { data: session, status } = useSession();
 	const { isLoading, isError, isSuccess, data } = useQuery(
 		["pendingLoansQueue"],
 		async () => {
@@ -37,37 +37,33 @@ const PendingLoansPage = () => {
 				</div>
 			)}
 			{isSuccess && (
-				<section>
-					<div className="my-12  mx-auto w-11/12 ">
-						<div className="overflow-x-auto rounded-3xl  shadow-lg" dir="rtl">
-							<table className="w-full  ">
-								<thead className="border-white text-right font-medium text-lg bg-white">
-									<tr>
-										<th className="px-6 pt-6 pb-4 font-semibold">إسم العميل</th>
-										<th className="px-6 pt-6 pb-4 font-semibold">
-											مسئول المبيعات
-										</th>
-										<th className="px-6 pt-6 pb-4 font-semibold">المنتج</th>
-										<th className="px-6 pt-6 pb-4 font-semibold">
-											قيمة التمويل
-										</th>
-										<th className="px-6 pt-6 pb-4 font-semibold">
-											تاريخ الإرسال
-										</th>
-										<th className="px-6 pt-6 pb-4 font-semibold">
-											تاريخ التعديل
-										</th>
-										<th className="px-6 pt-6 pb-4 font-semibold">الحالة</th>
-									</tr>
-								</thead>
-								<tbody>
-									{data?.data?.data &&
-										data?.data?.data.map((item, index) => {
-											return <LoanRequestPreview key={index++} {...item} />;
-										})}
-								</tbody>
-							</table>
-						</div>
+				<section className="my-12">
+					<div className="overflow-x-auto rounded-3xl  shadow-lg" dir="rtl">
+						<table className="w-full  ">
+							<thead className="border-white text-right font-medium text-lg bg-white">
+								<tr>
+									<th className="px-6 pt-6 pb-4 font-semibold">إسم العميل</th>
+									<th className="px-6 pt-6 pb-4 font-semibold">
+										مسئول المبيعات
+									</th>
+									<th className="px-6 pt-6 pb-4 font-semibold">المنتج</th>
+									<th className="px-6 pt-6 pb-4 font-semibold">قيمة التمويل</th>
+									<th className="px-6 pt-6 pb-4 font-semibold">
+										تاريخ الإرسال
+									</th>
+									<th className="px-6 pt-6 pb-4 font-semibold">
+										تاريخ التعديل
+									</th>
+									<th className="px-6 pt-6 pb-4 font-semibold">الحالة</th>
+								</tr>
+							</thead>
+							<tbody>
+								{data?.data?.data &&
+									data?.data?.data.map((item, index) => {
+										return <LoanRequestPreview key={index++} {...item} />;
+									})}
+							</tbody>
+						</table>
 					</div>
 				</section>
 			)}

@@ -6,6 +6,9 @@ import { useRouter } from "next/router";
 import { ProductsDropDown } from "../ProductDropDown";
 import apiClient from "../../../Utils/Services/apiClient";
 import Modal from "../../Atoms/Modal";
+import { ClipLoader } from "react-spinners";
+import { CustomDropDown } from "../../Atoms/FormInputs/DropDown";
+import { useQuery } from "@tanstack/react-query";
 // import { FileUploader } from "../../Atomics/Files/FileUploader";
 
 const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
@@ -25,7 +28,38 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 		name: "يرجي الإختيار",
 		id: -1,
 	});
-	const [loanInstallments, setLoanInstallments] = useState(0);
+
+	const [selectProductTenor, setSelectProductTenor] = useState({
+		id: -1,
+		name: "يرجي الإختيار",
+	});
+
+	// tenur list
+	const {
+		isLoading: isLoadingTenur,
+		isError,
+		isSuccess: isSuccessTenur,
+		data: tenurList,
+		isRefetching,
+		isFetching,
+	} = useQuery(
+		["tenurList", selectedProduct.id],
+		async () => {
+			return await apiClient.get(
+				`/api/Lookup/GetLookupTenureYear?ProductID=${selectedProduct.id}`
+			);
+		},
+		{
+			enabled: selectedProduct.id !== -1,
+			onSettled: () =>
+				setSelectProductTenor({
+					id: -1,
+					name: "يرجي الإختيار",
+				}),
+		}
+	);
+
+	// const [loanInstallments, setLoanInstallments] = useState(0);
 	const [modalBody, setModalBody] = useState({
 		title: "",
 		text: "",
@@ -61,87 +95,161 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 	// 	}
 	// }, [selectedProduct, setSelectedProduct]);
 
-	// const handleSeachCustomer = () => {
-	// 	const loading = toast.loading("جاري البحث عن العميل..");
-	// 	apiClient
-	// 		.post("/api/Customer/GetCustomerDetails", { customerId: customerId })
-	// 		.then(({ data }) => {
-	// 			toast.dismiss(loading);
-	// 			if (data.isSuccess) {
-	// 				toast.success("العميل موجود..");
-	// 			}
-	// 			if (data.customer) {
-	// 				const customer = data.customer;
-	// 				setValue("idno", customer.customer.idno);
-	// 				setCustomerData(data.customer);
-	// 				setUserExist(true);
-	// 			} else {
-	// 				toast.error("العميل غير موجود..");
-	// 				resetField("idno");
-	// 			}
-	// 		})
-	// 		.catch(() => {
-	// 			toast.dismiss(loading);
-	// 			toast.error("لقد حدث خطأ..");
-	// 		});
-	// };
-	// useEffect(() => {
-	// 	handleSeachCustomer();
-	// }, []);
 	const onSubmit = (data) => {
 		const loading = toast.loading("جاري إضافة التمويل..");
 		apiClient
 			.post("/api/Loan/CreateLoan", {
 				customerID: Number(customerId),
-				product: selectedProduct.id,
+				productID: selectedProduct.id,
+				tenureID: Number(selectProductTenor.id),
+				tenureValue: selectProductTenor.name,
 				amount: Number(data.LoanAmount),
-				period: Number(data.LoanDuration),
 				downPayment: Number(data.DownPayment),
 			})
 			.then((res) => {
 				toast.dismiss(loading);
+				console.log(res.data, "loogos");
+				if (res.data.errors.code == 0) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "يرجي المحاولة مرة أخري",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+				if (res.data.errors.code == 8) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "هذا العميل غير مسجل لدينا",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+				if (res.data.errors.code == 7) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "لم يتم حفظ البيانات! يرجي المحاولة مرة اخري",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+				if (res.data.errors.code == 43) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "هذا العميل غير مقبول",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+				if (res.data.errors.code == 44) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "هذا العميل يمتلك تمويلات اخري قيد الفحص",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+				if (res.data.errors.code == 54) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "لقد تخطي العميل الحد الأقصى للتمويل, يرجي تعديل قيمة التمويل",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+				if (res.data.errors.code == 55) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "يرجي زيادة مدة التمويل",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+				if (res.data.errors.code == 56) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "قيمة التمويل أقل من الحد الادني المسموح للمنتج",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+				if (res.data.errors.code == 57) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "لقد تخطيت الحد المسموح لهذا المنتج",
+						type: "error",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+
+				if (res.data.isSuccess) {
+					setModalBody({
+						title: "لقد تم إضافة تمويل بنجاح!",
+						text: "جاري مراجعة بيانات العميل من القسم المختص.",
+						type: "succes",
+						isOpen: true,
+						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
+						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+					});
+				}
+			})
+			.catch((err) => {
 				setModalBody({
 					title: "لقد حدث خطأ!",
-					text: "لقد تخطي العميل الحد الأقصى للتمويل, يرجي تعديل قيمة التمويل",
+					text: "يرجي التأكد من البيانات المدخلة",
 					type: "error",
 					isOpen: true,
 					onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
 					onClose: () => setModalBody({ ...modalBody, isOpen: false }),
 				});
-
-				if (res.data.isSuccess) {
-					toast.success("تم إضافة التمويل..");
-				}
+				console.log(err, "err");
 			});
 	};
-	const requestDate = new Date();
-	const watchLoanAmount = watch("LoanAmount");
-	const watchLoanDuration = watch("LoanDuration");
-	const watchDownPayment = watch("DownPayment");
-	const handleCalcLoans = () => {
-		const loading = toast.loading("جاري حسبة القسط..");
-		apiClient
-			.post("/api/Loan/Calculator", {
-				customerId: customerId,
-				pricingSegmentId: 4,
-				productId: Number(selectedProduct.id),
-				downPayment: Number(watchDownPayment),
-				amount: Number(watchLoanAmount),
-				period: Number(watchLoanDuration),
-				requestDate: requestDate,
-			})
-			.then((res) => {
-				toast.dismiss(loading);
-				console.log(res, "fafaf");
-				if (res.data.isSuccess) {
-					setLoanInstallments(res.data.data.installmentAmount);
-				}
-			})
-			.catch(() => {
-				toast.dismiss(loading);
-				toast.error("حدث خطأ..");
-			});
-	};
+	// const requestDate = new Date();
+	// const watchLoanAmount = watch("LoanAmount");
+	// const watchLoanDuration = watch("LoanDuration");
+	// const watchDownPayment = watch("DownPayment");
+	// const handleCalcLoans = () => {
+	// 	const loading = toast.loading("جاري حسبة القسط..");
+	// 	apiClient
+	// 		.post("/api/Loan/Calculator", {
+	// 			customerId: customerId,
+	// 			pricingSegmentId: 4,
+	// 			productId: Number(selectedProduct.id),
+	// 			downPayment: Number(watchDownPayment),
+	// 			amount: Number(watchLoanAmount),
+	// 			period: Number(watchLoanDuration),
+	// 			requestDate: requestDate,
+	// 		})
+	// 		.then((res) => {
+	// 			toast.dismiss(loading);
+	// 			if (res.data.isSuccess) {
+	// 				setLoanInstallments(res.data.data.installmentAmount);
+	// 			}
+	// 		})
+	// 		.catch(() => {
+	// 			toast.dismiss(loading);
+	// 			toast.error("حدث خطأ..");
+	// 		});
+	// };
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   w-full `;
 	return (
 		<section className="  bg-white  rounded-3xl ">
@@ -178,7 +286,6 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 				autoComplete="off"
 			>
 				<div className="mb-5">
-					<h2 className="mt-12 mb-6 font-3xl font-bold ">بيانات العميل</h2>
 					<div className="grid grid-cols-2 gap-6">
 						<div className=" w-full space-y-4">
 							<p className="font-semibold">اسم العميل</p>
@@ -186,6 +293,13 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 								customerInfo.secondName || ""
 							} ${customerInfo.middileName} ${customerInfo.lastName || ""}`}</p>
 						</div>
+						<div className=" w-full space-y-4">
+							<p className="font-semibold">الرقم القومي</p>
+							<p className={buttonClass}>{`${customerInfo.nationalID}`}</p>
+						</div>
+					</div>
+					<h2 className="mt-12 mb-6 font-3xl font-bold ">نتيجة التقييم</h2>
+					<div className="grid grid-cols-2 gap-6">
 						<div className=" w-full space-y-4">
 							<p className="font-semibold">حد التمويل</p>
 							<p className={buttonClass}>{customerInfo.exposureLimit}</p>
@@ -242,15 +356,23 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 							/>
 						</div>
 						<div className=" w-full space-y-4">
-							<label htmlFor="LoanDuration" className="font-semibold">
-								مدة التمويل
-							</label>
-							<input
-								type="string"
-								placeholder="0"
-								{...register("LoanDuration", { required: true })}
-								className={buttonClass}
-							/>
+							{isFetching && (
+								<div className="py-12 flex justify-center items-center">
+									<ClipLoader />
+								</div>
+							)}
+
+							{!isFetching && (
+								<CustomDropDown
+									option={selectProductTenor}
+									selectOption={setSelectProductTenor}
+									items={tenurList?.data?.data || []}
+									icon={"Arrow"}
+									label="مدة التمويل"
+									disable={isLoadingTenur}
+									className=" text-black  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
+								/>
+							)}
 						</div>
 					</div>
 					<div className="grid  gap-6 ">
@@ -265,7 +387,7 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 								className={buttonClass}
 							/>
 						</div>
-						<div>
+						{/* <div>
 							<button
 								className=" font-semibold rounded-full text-white py-6 bg-[#EDAA00]   w-full"
 								onClick={(e) => {
@@ -279,7 +401,7 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 						<div className=" w-full space-y-4">
 							<p className="font-semibold">قيمة القسط</p>
 							<div className={buttonClass}>{loanInstallments} </div>
-						</div>
+						</div> */}
 					</div>
 				</div>
 

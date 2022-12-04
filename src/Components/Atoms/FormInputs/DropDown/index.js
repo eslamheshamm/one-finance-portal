@@ -18,9 +18,11 @@ export const CustomDropDown = ({
 			<Listbox disabled={disable} value={option} onChange={selectOption}>
 				<div className="relative ">
 					<Listbox.Button disabled={disable} className={classNames(className)}>
-						<span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-12">
-							{icon}
-						</span>
+						{icon && (
+							<span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-12">
+								{icon === "Arrow" ? Arrow : icon}
+							</span>
+						)}
 						<span className="block ">{option.name || btnName}</span>
 					</Listbox.Button>
 					<Transition
@@ -39,6 +41,7 @@ export const CustomDropDown = ({
 										}`
 									}
 									value={item}
+									disabled={disable}
 								>
 									{({ selected }) => (
 										<>
@@ -65,3 +68,21 @@ export const CustomDropDown = ({
 		</div>
 	);
 };
+
+const Arrow = (
+	<svg
+		width="16"
+		height="10"
+		viewBox="0 0 16 10"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<path
+			d="M14.9263 1.36816L7.9631 8.33134L0.999928 1.36816"
+			stroke="#14142B"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		/>
+	</svg>
+);

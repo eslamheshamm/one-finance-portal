@@ -15,6 +15,10 @@ export const SaleSideBar = () => {
 					title: "قائمة العملاء",
 					route: "/sales/customers/queue",
 				},
+				{
+					title: "العملاء المقبولين",
+					route: "/sales/customers/approved",
+				},
 			],
 		},
 		loan: {

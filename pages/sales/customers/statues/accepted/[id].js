@@ -24,6 +24,7 @@ const AcceptedCustomer = () => {
 			refetchIntervalInBackground: false,
 		}
 	);
+	// console.log(data.data.data, "dataa");
 	const buttonClass = "rounded-full px-10 p-5 bg-[#DADADA36]";
 	return (
 		<DashboardLayout>
@@ -57,6 +58,16 @@ const AcceptedCustomer = () => {
 						</div>
 					</div>
 					<div className={"py-8  px-12 border-gray-100 rounded-3xl bg-white"}>
+						<div className="flex items-center mb-3">
+							<div className="ml-4  rounded-full  flex justify-center items-center">
+								{Person}
+							</div>
+							<p className="font-bold">{`${data.data.data.firstName || ""} ${
+								data.data.data.secondName || ""
+							} ${data.data.data.middileName} ${
+								data.data.data.lastName || ""
+							}`}</p>
+						</div>
 						<div className="mb-12">
 							<h2 className="mt-12 mb-6 font-3xl font-bold ">نتيجة التقييم</h2>
 							<div className="grid grid-cols-2 gap-6">
@@ -94,16 +105,6 @@ const AcceptedCustomer = () => {
 						</div>
 						<div className="flex flex-col items-start ">
 							<h2 className="mb-6  font-bold">معلومات العميل</h2>
-							<div className="flex items-center mb-3">
-								<div className="ml-4  rounded-full  flex justify-center items-center">
-									{Person}
-								</div>
-								<p className="font-bold">{`${data.data.data.firstName || ""} ${
-									data.data.data.secondName || ""
-								} ${data.data.data.middileName} ${
-									data.data.data.lastName || ""
-								}`}</p>
-							</div>
 						</div>
 						{data.data.data && (
 							<div className="grid grid-cols-2 gap-x-8 gap-y-6">
