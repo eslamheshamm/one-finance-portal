@@ -1,15 +1,23 @@
+import { useQuery } from "@tanstack/react-query";
+import { data } from "autoprefixer";
 import classNames from "classnames";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
+import { ClipLoader } from "react-spinners";
+import apiClient from "../../../Utils/Services/apiClient";
+import { CustomDropDown } from "../../Atoms/FormInputs/DropDown";
+
 import { ProductsDropDown } from "../ProductDropDown";
 
 // import { FileUploader } from "../../Atomics/Files/FileUploader";
 // import { Loading } from "../../Atomics/Loading";
 
 const AddLoanForm = () => {
+	const { data: session } = useSession();
+
 	const {
 		register,
 		handleSubmit,
@@ -17,19 +25,49 @@ const AddLoanForm = () => {
 		getValues,
 		watch,
 	} = useForm();
-	const { data: session } = useSession();
-	const [customerId, setCustomerId] = useState(null);
-	const [customerInfo, setCustomerData] = useState(null);
 
 	const [selectedCategoryProduct, setSelectedCategoryProduct] = useState({
-		categoryName: "يرجي الإختيار",
-		categoryId: -1,
+		name: "يرجي الإختيار",
+		id: -1,
 		product: [],
 	});
 	const [selectedProduct, setSelectedProduct] = useState({
 		name: "يرجي الإختيار",
 		id: -1,
 	});
+
+	const [selectProductTenor, setSelectProductTenor] = useState({
+		id: -1,
+		name: "يرجي الإختيار",
+	});
+
+	// tenur list
+	const {
+		isLoading: isLoadingTenur,
+		isError,
+		isSuccess: isSuccessTenur,
+		data: tenurList,
+		isRefetching,
+		isFetching,
+	} = useQuery(
+		["tenurList", selectedProduct.id],
+		async () => {
+			return await apiClient.get(
+				`/api/Lookup/GetLookupTenureYear?ProductID=${selectedProduct.id}`
+			);
+		},
+		{
+			enabled: selectedProduct.id !== -1,
+			onSettled: () =>
+				setSelectProductTenor({
+					id: -1,
+					name: "يرجي الإختيار",
+				}),
+		}
+	);
+
+	const [customerId, setCustomerId] = useState(null);
+	const [customerInfo, setCustomerData] = useState(null);
 
 	const [requetedLoanDocs, setRequetedLoanDocs] = useState(null);
 	const [loadingDocs, setLoadingDocs] = useState(false);
@@ -64,18 +102,19 @@ const AddLoanForm = () => {
 		const loading = toast.loading("جاري البحث عن العميل..");
 		const idno = getValues("nationalId");
 		apiClient
-			.post("/api/Customer/GetCustomerSearchResult", { idno: idno })
+			.get("/api/Customer/GetCustomerDetailsByNationalID", {
+				params: {
+					NationalID: idno,
+				},
+			})
 			.then(({ data }) => {
+				console.log(data, "customer");
 				toast.dismiss(loading);
-				if (data.isSuccess) {
-					toast.success("العميل موجود..");
-					setCustomerId(data.customer.customer.id);
-					setCustomerData(data.customer);
-					console.log(data.customer);
-				}
-				if (!data.isSuccess) {
-					toast.error("العميل غير موجود..");
-				}
+				// if (data.isSuccess) {
+				// 	toast.success("العميل موجود..");
+				// 	setCustomerId(data.customer.customer.id);
+				// 	setCustomerData(data.customer);
+				// }
 			})
 			.catch(() => {
 				toast.dismiss(loading);
@@ -86,29 +125,22 @@ const AddLoanForm = () => {
 		const loading = toast.loading("جاري إضافة التمويل..");
 		apiClient
 			.post("/api/Loan/CreateLoan", {
-				id: 0,
-				customerId: Number(customerId),
-				sales: session.user.id,
-				product: selectedProduct.id,
+				customerID: Number(customerId),
+				productID: selectedProduct.id,
+				tenureID: Number(selectProductTenor.id),
+				tenureValue: selectProductTenor.name,
 				amount: Number(data.LoanAmount),
-				period: Number(data.LoanDuration),
 				downPayment: Number(data.DownPayment),
 			})
 			.then((res) => {
-				toast.dismiss(loading);
-				if (res.data.code == 602) {
-					toast.error("العميل يمتلك تمويل بالفعل..");
-					return null;
-				}
-				if (res.data.isSuccess === true) {
-					toast.success("تم إضافة التمويل..");
-				}
+				console.log(res, "add loan res");
 			})
 			.catch(() => {
 				toast.dismiss(loading);
 				toast.error("لقد حدث خطأ..");
 			});
 	};
+
 	const requestDate = new Date();
 	const watchLoanAmount = watch("LoanAmount");
 	const watchLoanDuration = watch("LoanDuration");
@@ -136,29 +168,7 @@ const AddLoanForm = () => {
 				toast.error("حدث خطأ..");
 			});
 	};
-	// useEffect(() => {
-	// 	if (
-	// 		(watchLoanAmount &&
-	// 			watchLoanDuration > 0 &&
-	// 			selectedProduct.interestRate) ||
-	// 		watchDownPayment > 0
-	// 	) {
-	// 		const finalRepaymentAmount = calcLoans(
-	// 			Number(watchLoanAmount),
-	// 			Number(watchLoanDuration),
-	// 			Number(selectedProduct.interestRate),
-	// 			requestDate
-	// 		);
-	// 		setLoanInstallments(finalRepaymentAmount);
-	// 	}
-	// }, [
-	// 	watchLoanAmount,
-	// 	watchLoanDuration,
-	// 	watchDownPayment,
-	// 	selectedProduct,
-	// 	setLoanInstallments,
-	// 	loanInstallments,
-	// ]);
+
 	const buttonClass = `p-6 placeholder-[#9099A9] rounded-full  bg-[#DADADA36] bg-opacity-20   focus:outline-2 focus:outline-[#EDAA00] block w-full  border-0 focus:ring-0 focus:outline-none`;
 
 	return (
@@ -225,7 +235,63 @@ const AddLoanForm = () => {
 						</div>
 					</div>
 				</div>
-				{customerInfo && customerInfo.customerScoring && (
+				<div className="flex flex-col items-start py-10 border-b mb-10">
+					<div className="w-full">
+						<h2 className="mb-6 text-2xl font-bold">نتيجة التقييم</h2>
+						<div className="grid grid-cols-4 gap-x-8 gap-y-6  ">
+							<div>
+								<h5 className="my-3 font-medium">شريحة التسعير</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{scoringResult.pricing === 1 && "A"}
+									{scoringResult.pricing === 2 && "B"}
+									{scoringResult.pricing === 3 && "C"}
+									{scoringResult.pricing === 4 && "D"}
+								</p>
+							</div>{" "}
+							<div>
+								<h5 className="my-3 font-medium"> شريحة العميل</h5>
+								<p className=" rounded-full px-10 p-5 bg-[#DADADA36]">
+									{scoringResult.segmentation === 1 && "Prestige"}
+									{scoringResult.segmentation === 2 && "Elite"}
+									{scoringResult.segmentation === 3 && "Select Plus"}
+									{scoringResult.segmentation === 4 && "Select"}{" "}
+								</p>
+							</div>
+							<div className=" w-full">
+								<p className="my-3 ">حد التمويل</p>
+								<p className=" rounded-full px-10 p-6  bg-[#DADADA36]    ">
+									{scoringResult.exposure_limit}
+								</p>
+							</div>
+							<div className=" w-full">
+								<p className="my-3 ">cgf_limit</p>
+								<p className=" rounded-full px-10 p-6  bg-[#DADADA36]    ">
+									{scoringResult.cgf_limit}
+								</p>
+							</div>
+							<div className=" w-full">
+								<p className="my-3 ">عبء الدين الشهري (نسبة)</p>
+								<p className=" rounded-full px-10 p-6  bg-[#DADADA36]    ">
+									<span>{scoringResult.dpr}</span>
+									<span>%</span>
+								</p>
+							</div>
+							<div className=" w-full">
+								<p className="my-3 ">عبء الدين الشهري (قيمة)</p>
+								<p className=" rounded-full px-10 p-6  bg-[#DADADA36]    ">
+									{scoringResult.dbr_amount}
+								</p>
+							</div>
+							<div className=" w-full">
+								<p className="my-3 "> عبء الدين الشهري المتاح (قيمة)</p>
+								<p className=" rounded-full px-10 p-6 bg-[#DADADA36]">
+									{scoringResult.availableDBR}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				{customerInfo && data.data.data && (
 					<div>
 						<h2 className="mt-12 mb-6 font-3xl font-bold ">تقييم العميل</h2>
 						{customerInfo && customerInfo.customerScoring && (
@@ -268,7 +334,7 @@ const AddLoanForm = () => {
 					</div>
 				)}
 				<div className="grid grid-cols-2 gap-6">
-					<h2 className="mt-12 mb-6 font-3xl font-bold ">بيانات التمويل</h2>
+					<h2 className="mb-6 font-3xl font-bold ">بيانات التمويل</h2>
 					<ProductsDropDown
 						selectedCategoryProduct={selectedCategoryProduct}
 						setSelectedCategoryProduct={setSelectedCategoryProduct}
@@ -290,18 +356,26 @@ const AddLoanForm = () => {
 						/>
 					</div>
 					<div className=" w-full space-y-4">
-						<label htmlFor="LoanDuration" className="font-semibold">
-							مدة التمويل
-						</label>
-						<input
-							type="string"
-							placeholder="0"
-							{...register("LoanDuration", { required: true })}
-							className={buttonClass}
-						/>
+						{isFetching && (
+							<div className="py-12 flex justify-center items-center">
+								<ClipLoader />
+							</div>
+						)}
+
+						{!isFetching && (
+							<CustomDropDown
+								option={selectProductTenor}
+								selectOption={setSelectProductTenor}
+								items={tenurList?.data?.data || []}
+								icon={"Arrow"}
+								label="مدة التمويل"
+								disable={isLoadingTenur}
+								className=" text-black  p-6 w-full rounded-full text-right   bg-[#DADADA36] bg-opacity-20"
+							/>
+						)}
 					</div>
 				</div>
-				<div className="grid  gap-6">
+				{/* <div className="grid  gap-6">
 					<div className=" w-full space-y-4">
 						<label htmlFor="DownPayment" className="font-semibold">
 							الدفعة المقدمة
@@ -328,7 +402,7 @@ const AddLoanForm = () => {
 						<p className="font-semibold">قيمة القسط</p>
 						<div className={buttonClass}>{loanInstallments} </div>
 					</div>
-				</div>
+				</div> */}
 				{/* <div>
 					{loadingDocs && (
 						<div className="py-12 flex justify-center items-center">
