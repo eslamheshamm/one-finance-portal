@@ -50,6 +50,7 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 			);
 		},
 		{
+			refetchOnWindowFocus: false,
 			enabled: selectedProduct.id !== -1,
 			refetchInterval: false,
 			onSettled: () =>

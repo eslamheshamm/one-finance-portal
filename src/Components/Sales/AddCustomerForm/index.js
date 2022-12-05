@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import classNames from "classnames";

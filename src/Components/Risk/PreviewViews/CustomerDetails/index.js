@@ -64,7 +64,11 @@ export const CustomerDetails = ({
 		handleSubmit,
 		formState: { errors },
 		watch,
-	} = useForm();
+	} = useForm({
+		defaultValues: {
+			assumedIncome: 0,
+		},
+	});
 
 	const [scoringResult, setScoringResult] = useState(null);
 	const [calcScore, setCalcScore] = useState(false);
@@ -88,7 +92,7 @@ export const CustomerDetails = ({
 	const watchReasons = watch("statue");
 
 	const AcceptOrSaveCustomer = (data) => {
-		console.log(data);
+		// console.log(data);
 		const loading = toast.loading(
 			calcScore === true
 				? "جاري حساب نتيجة تقييم العميل.."
@@ -102,38 +106,26 @@ export const CustomerDetails = ({
 				pricingSegment: pricing.value,
 				isSaving: calcScore === true ? false : true,
 				calculation: {
-					iScoreScore: data.iScore,
+					iScoreScore: Number(data.iScore),
 					iScoreFileUrl: "",
 					homeVisitFileUrl: "",
 					workVisitFileUrl: "",
 					comment: "",
-					assumedIncome: data.assumedIncome,
+					assumedIncome: Number(data.assumedIncome),
 					creditCard: data.creditCard,
-					personalLoan: data.personalLoan,
-					autoLoan: data.autoLoan,
-					overDraft: data.overDraft,
+					personalLoan: Number(data.personalLoan),
+					autoLoan: Number(data.autoLoan),
+					overDraft: Number(data.overDraft),
 				},
 			})
 			.then((res) => {
 				toast.dismiss(loading);
-				console.log(res.data);
+				console.log(res.data, "ressponse from backend");
 				setScoringResult(res.data.data);
-				if (res.data.errors.code == 62) {
+				if (res.data.data.segmentation && res.data.data.exposure_limit) {
 					setModalBody({
-						title: "عذراً!",
-						text: "لقد تم رفض العميل.",
-						type: "error",
-						isOpen: true,
-						onAccept: () =>
-							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
-						onClose: () =>
-							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
-					});
-				}
-				if (res.data.isSuccess === false) {
-					setModalBody({
-						title: "مبروك!",
-						text: "لقد تم قبول العميل.",
+						title: "عملية ناجحة",
+						text: "لقد تم حساب نتيجة تقييم العميل.",
 						type: "success",
 						isOpen: true,
 						onAccept: () =>
@@ -142,6 +134,66 @@ export const CustomerDetails = ({
 							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
 					});
 				}
+				if (res.data.errors.code == 62) {
+					setModalBody({
+						title: "عذراً!",
+						text: "لقد تم رفض العميل. الIscore الخاص به أقل من الحد الأدني للقبول",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				}
+				if (res.data.errors.code == 39) {
+					setModalBody({
+						title: "عذراً!",
+						text: "حالة خاطئة.",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				}
+				if (res.data.errors.code == 51) {
+					setModalBody({
+						title: "عذراً!",
+						text: "الدخل الفعلي للعميل لا يتوافق مع الدخل المقدر.",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				}
+				if (res.data.errors.code == 53) {
+					setModalBody({
+						title: "عذراً!",
+						text: "يرجي مراجعة العميل للتأكد من البيانات المدخلة.",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				}
+				// if (res.data.isSuccess === false) {
+				// 	setModalBody({
+				// 		title: "مبروك!",
+				// 		text: "لقد تم قبول العميل",
+				// 		type: "success",
+				// 		isOpen: true,
+				// 		onAccept: () =>
+				// 			setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+				// 		onClose: () =>
+				// 			setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+				// 	});
+				// }
 			})
 			.catch((res) => {
 				console.log(res);
