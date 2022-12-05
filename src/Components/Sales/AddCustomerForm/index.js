@@ -152,11 +152,21 @@ const AddCustomerForm = () => {
 				toast.dismiss(loading);
 				if (data.isSuccess) {
 					setCustomerId(data.data.customerID);
+					setModalBody({
+						title: "مبروك!",
+						text: "تم حفظ العميل بنجاح",
+						type: "success",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
 				}
 			})
 			.catch(() => {
 				toast.dismiss(loading);
-				toast.error("لقد حدث خطأ في الأنترنت.");
+				// toast.error("لقد حدث خطأ في الأنترنت.");
 			})
 			.finally(() => {
 				toast.dismiss(loading);
@@ -172,6 +182,18 @@ const AddCustomerForm = () => {
 			})
 			.then(({ data }) => {
 				toast.dismiss(loading);
+				if (data.isSuccess) {
+					setModalBody({
+						title: "مبروك!",
+						text: "تم ارسال العميل بنجاح",
+						type: "success",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				}
 				if (data.errors.code == 40) {
 					setModalBody({
 						title: "عذراً",
@@ -199,7 +221,7 @@ const AddCustomerForm = () => {
 			})
 			.catch(() => {
 				toast.dismiss(loading);
-				toast.error("لقد حدث خطأ في الأنترنت.");
+				// toast.error("لقد حدث خطأ في الأنترنت.");
 			});
 	};
 
