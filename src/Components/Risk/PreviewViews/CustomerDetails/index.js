@@ -64,11 +64,11 @@ export const CustomerDetails = ({
 		handleSubmit,
 		formState: { errors },
 		watch,
-	} = useForm({
-		defaultValues: {},
-	});
+	} = useForm();
+
 	const [scoringResult, setScoringResult] = useState(null);
 	const [calcScore, setCalcScore] = useState(false);
+
 	const [pricing, setPricing] = useState({ name: "لا يوجد", value: 0 });
 	//  refuse reasons
 	const [refuseReason, setRefuseReason] = useState({
@@ -90,18 +90,19 @@ export const CustomerDetails = ({
 	const AcceptOrSaveCustomer = (data) => {
 		console.log(data);
 		const loading = toast.loading(
-			watchReasons === "save" ? "جاري حفظ العميل.." : "جاري قبول العميل.."
+			calcScore === true
+				? "جاري حساب نتيجة تقييم العميل.."
+				: "جاري قبول العميل.."
 		);
-
 		apiClient
 			.post("/api/Customer/ApproveCustomer", {
 				customerID: customerInfo.customerID,
-				comment: data.notes,
+				comment: "",
 				monthlyIncome: customerInfo.monthlyIncome,
 				pricingSegment: pricing.value,
-				isSaving: calcScore ? true : false,
+				isSaving: calcScore === true ? false : true,
 				calculation: {
-					iScoreScore: data.Iscore,
+					iScoreScore: data.iScore,
 					iScoreFileUrl: "",
 					homeVisitFileUrl: "",
 					workVisitFileUrl: "",
@@ -117,9 +118,10 @@ export const CustomerDetails = ({
 				toast.dismiss(loading);
 				console.log(res.data);
 				setScoringResult(res.data.data);
-				if (res.data.errors.code == 39) {
+				if (res.data.errors.code == 62) {
 					setModalBody({
-						title: "حالة خاطئة!",
+						title: "عذراً!",
+						text: "لقد تم رفض العميل.",
 						type: "error",
 						isOpen: true,
 						onAccept: () =>
@@ -128,13 +130,18 @@ export const CustomerDetails = ({
 							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
 					});
 				}
-				// if (res.data.isSuccess) {
-				// 	toast.success(
-				// 		watchReasons === "save"
-				// 			? "تم حفظ العميل بنجاح."
-				// 			: "تم قبول العميل بنجاح."
-				// 	);
-				// }
+				if (res.data.isSuccess === false) {
+					setModalBody({
+						title: "مبروك!",
+						text: "لقد تم قبول العميل.",
+						type: "success",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				}
 			})
 			.catch((res) => {
 				console.log(res);
@@ -150,7 +157,6 @@ export const CustomerDetails = ({
 				// 	});
 				// }
 				// toast.dismiss(loading);
-				// toast.error("لقد حدث خطأ في الأنترنت.");
 			})
 			.finally(() => {
 				// setTimeout(() => {
@@ -211,7 +217,7 @@ export const CustomerDetails = ({
 	};
 	// form
 	const onSubmit = (data) => {
-		if (watchReasons === "accept" || watchReasons === "save") {
+		if (watchReasons === "accept" || calcScore === true) {
 			AcceptOrSaveCustomer(data);
 		}
 		if (watchReasons === "refuse") {
@@ -242,6 +248,11 @@ export const CustomerDetails = ({
 				discardBtntext="إلغاء"
 				acceptBtnText="تأكيد"
 			/>
+			{(customerInfo.isNegativeSector || customerInfo.isNegativeJob) && (
+				<div className=" mb-6 py-4 px-12 flex flex-col items-start gap-4 bg-red-500 text-xl rounded-3xl  font-bold text-white ">
+					<p>يرجي العلم إن هذا العميل مهنة غير مستهدفة.</p>
+				</div>
+			)}
 			<CustomerInfo customerInfo={customerInfo} />
 
 			{disableAction ? null : (
@@ -332,10 +343,8 @@ export const CustomerDetails = ({
 
 							<div className=" flex justify-end items-end">
 								<button
-									onClick={(e) => {
-										e.preventDefault();
-										setCalcScore(true);
-									}}
+									onClick={() => setCalcScore(true)}
+									type="submit"
 									className="font-semibold rounded-full py-6  w-full bg-[#343434] text-white   hover:bg-[#EDAA00]  transition-all duration-200"
 								>
 									<span>حساب التقييم</span>
@@ -438,7 +447,9 @@ export const CustomerDetails = ({
 									className="sr-only peer"
 									type="radio"
 									value="accept"
-									{...register("statue", { required: true })}
+									{...register("statue", {
+										required: calcScore ? false : true,
+									})}
 									id="accept"
 								/>
 								<label
@@ -454,7 +465,9 @@ export const CustomerDetails = ({
 									className="sr-only peer"
 									type="radio"
 									value="requestForEdit"
-									{...register("statue", { required: true })}
+									{...register("statue", {
+										required: calcScore ? false : true,
+									})}
 									id="edit"
 								/>
 								<label
@@ -469,7 +482,9 @@ export const CustomerDetails = ({
 									className="sr-only peer"
 									type="radio"
 									value="refuse"
-									{...register("statue", { required: true })}
+									{...register("statue", {
+										required: calcScore ? false : true,
+									})}
 									id="refuse"
 								/>
 								<label
@@ -512,6 +527,7 @@ export const CustomerDetails = ({
 						<button
 							type="submit"
 							className="font-semibold rounded-full py-5  px-24  bg-[#343434] text-white   hover:bg-[#EDAA00]  transition-all duration-200"
+							onClick={() => setCalcScore(false)}
 						>
 							<span>إرسال</span>
 						</button>
@@ -663,25 +679,6 @@ const CustomerInfo = ({ customerInfo }) => {
 	);
 };
 
-const ActionButton = ({ name, register, text }) => {
-	return (
-		<li className="relative ml-4">
-			<input
-				className="sr-only peer"
-				type="radio"
-				value="save"
-				{...register({ name }, { required: true })}
-				id="save"
-			/>
-			<label
-				className="flex py-4 px-16 bg-[#A0A3BD] text-white border-0 rounded-full cursor-pointer focus:outline-none hover:bg-[#EDAA00]  peer-checked:ring-0 peer-checked:border-transparent peer-checked:bg-[#EDAA00]"
-				htmlFor="save"
-			>
-				{text}
-			</label>
-		</li>
-	);
-};
 const Person = (
 	<svg
 		width="39"

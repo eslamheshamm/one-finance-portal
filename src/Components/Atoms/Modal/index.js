@@ -67,7 +67,7 @@ export default function Modal({
 										</Dialog.Title>
 									)}
 									{text && (
-										<p className=" mb-6 text-sm text-right text-gray-500">
+										<p className=" mb-6 text-lg text-gray-500 text-center">
 											{text}
 										</p>
 									)}

@@ -51,6 +51,7 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 		},
 		{
 			enabled: selectedProduct.id !== -1,
+			refetchInterval: false,
 			onSettled: () =>
 				setSelectProductTenor({
 					id: -1,
@@ -109,119 +110,119 @@ const AddLoanDynamclyForm = ({ customerId, customerInfo }) => {
 			.then((res) => {
 				toast.dismiss(loading);
 				console.log(res.data, "loogos");
-				if (res.data.errors.code == 0) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "يرجي المحاولة مرة أخري",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-				if (res.data.errors.code == 8) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "هذا العميل غير مسجل لدينا",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-				if (res.data.errors.code == 7) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "لم يتم حفظ البيانات! يرجي المحاولة مرة اخري",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-				if (res.data.errors.code == 43) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "هذا العميل غير مقبول",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-				if (res.data.errors.code == 44) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "هذا العميل يمتلك تمويلات اخري قيد الفحص",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-				if (res.data.errors.code == 54) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "لقد تخطي العميل الحد الأقصى للتمويل, يرجي تعديل قيمة التمويل",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-				if (res.data.errors.code == 55) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "يرجي زيادة مدة التمويل",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-				if (res.data.errors.code == 56) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "قيمة التمويل أقل من الحد الادني المسموح للمنتج",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-				if (res.data.errors.code == 57) {
-					setModalBody({
-						title: "لقد حدث خطأ!",
-						text: "لقد تخطيت الحد المسموح لهذا المنتج",
-						type: "error",
-						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-					});
-				}
-
-				if (res.data.isSuccess) {
+				if (res.data.isSuccess == true) {
 					setModalBody({
 						title: "لقد تم إضافة تمويل بنجاح!",
 						text: "جاري مراجعة بيانات العميل من القسم المختص.",
 						type: "succes",
 						isOpen: true,
-						onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-						onClose: () => setModalBody({ ...modalBody, isOpen: false }),
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 0) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "يرجي المحاولة مرة أخري",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 8) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "هذا العميل غير مسجل لدينا",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 7) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "لم يتم حفظ البيانات! يرجي المحاولة مرة اخري",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 43) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "هذا العميل غير مقبول",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 44) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "هذا العميل يمتلك تمويلات اخري قيد الفحص",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 54) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "لقد تخطي العميل الحد الأقصى للتمويل, يرجي تعديل قيمة التمويل",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 55) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "يرجي زيادة مدة التمويل",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 57) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "قيمة التمويل أقل من الحد الادني المسموح للمنتج",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				} else if (res.data.errors.code == 56) {
+					setModalBody({
+						title: "لقد حدث خطأ!",
+						text: "لقد تخطيت الحد المسموح لهذا المنتج",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
 					});
 				}
 			})
-			.catch((err) => {
-				setModalBody({
-					title: "لقد حدث خطأ!",
-					text: "يرجي التأكد من البيانات المدخلة",
-					type: "error",
-					isOpen: true,
-					onAccept: () => setModalBody({ ...modalBody, isOpen: false }),
-					onClose: () => setModalBody({ ...modalBody, isOpen: false }),
-				});
-				console.log(err, "err");
-			});
+			.catch((res) => {});
 	};
 	// const requestDate = new Date();
 	// const watchLoanAmount = watch("LoanAmount");

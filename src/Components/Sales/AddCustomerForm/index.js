@@ -15,6 +15,7 @@ import { JobDropDown } from "./LookupsMenus/JobDropDown";
 import { JobSectorDropDown } from "./LookupsMenus/JobSectorDropDown";
 import { OwnHomeDropDown } from "./LookupsMenus/OwnHomDropDown";
 import { OwnSecondHomeDropDown } from "./LookupsMenus/OwnSecondHomeDropDown";
+import Modal from "../../Atoms/Modal";
 
 const AddCustomerForm = () => {
 	const router = useRouter();
@@ -37,6 +38,13 @@ const AddCustomerForm = () => {
 	});
 	// customer
 	const [customerId, setCustomerId] = useState(null);
+	const [modalBody, setModalBody] = useState({
+		title: "",
+		text: "",
+		isOpen: false,
+		onAccept: () => {},
+		onClose: () => {},
+	});
 	const [customerDocs, setCustomerDocs] = useState(null);
 
 	// watch
@@ -164,11 +172,29 @@ const AddCustomerForm = () => {
 			})
 			.then(({ data }) => {
 				toast.dismiss(loading);
-				if (data.isSuccess) {
-					toast.success("تم إرسال العميل بنجاح.");
-					setTimeout(() => {
-						router.reload();
-					}, 1000);
+				if (data.errors.code == 40) {
+					setModalBody({
+						title: "عذراً",
+						text: "لقد تم رفض هذا العميل.",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
+				}
+				if (data.errors.code == 39) {
+					setModalBody({
+						title: "عذراً",
+						text: "حالة خاطئة لهذا العميل.",
+						type: "error",
+						isOpen: true,
+						onAccept: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+						onClose: () =>
+							setModalBody((prevState) => ({ ...prevState, isOpen: false })),
+					});
 				}
 			})
 			.catch(() => {
@@ -241,6 +267,16 @@ const AddCustomerForm = () => {
 	return (
 		<section>
 			<Toaster position="bottom-center" />
+			<Modal
+				isOpen={modalBody.isOpen}
+				onClose={modalBody.onClose}
+				title={modalBody.title}
+				text={modalBody.text}
+				type={modalBody.type}
+				onAccept={modalBody.onAccept}
+				discardBtntext="إلغاء"
+				acceptBtnText="تأكيد"
+			/>
 			<form
 				onSubmit={handleSubmit(handleSaveCustomer)}
 				className="space-y-6"
